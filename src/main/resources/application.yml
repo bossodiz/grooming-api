@@ -1,0 +1,7 @@
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+jwt:
+  secret-key: NkQyYzNsbmQxNTJhZTJwZ2p2ZGZ5bjRkdmkwb0x6W0xFSF5Gb+OXy7hOjz7hGjmI==
