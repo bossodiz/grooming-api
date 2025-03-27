@@ -33,3 +33,7 @@ build/
 .vscode/
 mvnw.cmd
 .mvn
+
+### sql ###
+mysql_data
+mysql_config
