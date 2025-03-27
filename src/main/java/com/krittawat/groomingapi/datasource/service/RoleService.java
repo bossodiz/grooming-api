@@ -3,9 +3,9 @@ package com.krittawat.groomingapi.datasource.service;
 import com.krittawat.groomingapi.datasource.entity.ERole;
 import com.krittawat.groomingapi.datasource.repository.RoleRepository;
 import com.krittawat.groomingapi.error.DataNotFoundException;
+import com.krittawat.groomingapi.utils.EnumUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import com.krittawat.groomingapi.utils.EnumUtil;
 
 import java.util.Optional;
 
