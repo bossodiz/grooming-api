@@ -1,12 +1,17 @@
 spring:
+  jackson:
+    time-zone: Asia/Bangkok
   datasource:
-    url: jdbc:mysql://192.168.50.233:3306/dev
-    username: root
+    url: jdbc:mysql://localhost:3306/dev?useUnicode=yes&characterEncoding=UTF-8&connectTimeout=0&socketTimeout=0&autoReconnect=true&useSSL=false
+    username: admin
     password: 1234
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    driver-class-name: com.mysql.jdbc.Driver
     hikari:
       maximum-pool-size: 10
     jpa:
       hibernate:
         ddl-auto: update
       show-sql: true
+jwt:
+  secret-key: NkQyYzNsbmQxNTJhZTJwZ2p2ZGZ5bjRkdmkwb0x6W0xFSF5Gb+OXy7hOjz7hGjmI==
+  expiration: 86400000 # 1 วัน (มิลลิวินาที)

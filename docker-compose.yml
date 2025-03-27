@@ -1,30 +1,21 @@
 version: '3.8'
-
 services:
-  api-dev:
-    build:
-      context: ./api
-      dockerfile: Dockerfile
-    container_name: api-dev
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-container
+    restart: always
     environment:
-      - SPRING_PROFILES_ACTIVE=dev
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: dev
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: 1234
     ports:
-      - "8080:8080"
+      - "3306:3306"
+    volumes:
+      - ./mysql_data:/var/lib/mysql
+      - ./mysql_config/my.cnf:/etc/mysql/my.cnf
     networks:
-      - mynetwork
-
-  api-prod:
-    build:
-      context: ./api
-      dockerfile: Dockerfile
-    container_name: api-prod
-    environment:
-      - SPRING_PROFILES_ACTIVE=prod
-    ports:
-      - "8081:8080"
-    networks:
-      - mynetwork
+      - my_network
 
 networks:
-  mynetwork:
-    driver: bridge
+  my_network:
