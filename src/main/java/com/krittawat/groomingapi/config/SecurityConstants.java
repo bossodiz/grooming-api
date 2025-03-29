@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Getter
 public class SecurityConstants {
-    public static final String[] PUBLIC_ENDPOINTS = {"/auth/**"};
+    public static final String[] PUBLIC_ENDPOINTS = {"/auth/login"};
     public static String SECRET_KEY;
     public static long EXPIRATION;
 

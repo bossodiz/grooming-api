@@ -12,21 +12,21 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(BadRequestException.class)
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Response handleBadRequestException(BadRequestException ex) {
         return Response.builder()
                 .code(400)
                 .data(null)
-                .error(ex.getMessage()).build();
+                .message(ex.getMessage()).build();
     }
 
     @ExceptionHandler(DataNotFoundException.class)
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Response handleNotFoundException(DataNotFoundException ex) {
         return Response.builder()
                 .code(404)
                 .data(null)
-                .error(ex.getMessage()).build();
+                .message(ex.getMessage()).build();
     }
 
     @ExceptionHandler({UnauthorizedException.class, TokenExpiredException.class})
@@ -35,11 +35,11 @@ public class GlobalExceptionHandler {
         return Response.builder()
                 .code(401)
                 .data(null)
-                .error(ex.getMessage()).build();
+                .message(ex.getMessage()).build();
     }
 
     @ExceptionHandler(Exception.class)
-    @ResponseStatus(HttpStatus.OK) // กรณี Exception อื่นๆ
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR) // กรณี Exception อื่นๆ
     public Response handleGenericException(Exception ex) {
         StackTraceElement[] stackTrace = ex.getStackTrace();
         String errorDetails = stackTrace[0].getFileName() + ":" + stackTrace[0].getLineNumber();
@@ -47,7 +47,7 @@ public class GlobalExceptionHandler {
         return Response.builder()
                 .code(500)
                 .data(null)
-                .error("["+errorDetails + "] : [" +ex.getMessage() + "]")
+                .message("["+errorDetails + "] : [" +ex.getMessage() + "]")
                 .build();
     }
 }
