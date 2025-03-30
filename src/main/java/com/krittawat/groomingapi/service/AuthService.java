@@ -42,6 +42,7 @@ public class AuthService {
                     .token(jwtUtilService.generateToken(request.getUsername()))
                     .refreshToken(jwtUtilService.generateRefreshToken(request.getUsername()))
                     .profile(UserProfile.builder()
+                            .id(user.getId())
                             .firstname(user.getFirstname())
                             .lastname(user.getLastname())
                             .nickname(user.getNickname())
@@ -78,7 +79,7 @@ public class AuthService {
         user.setEmail(UtilService.trimOrNull(request.getEmail()));
         user.setPhone1(UtilService.trimOrNull(request.getPhone1()));
         user.setPhone2(UtilService.trimOrNull(request.getPhone2()));
-        user.setRole(roleService.getRoleUSER());
+        user.setRole(roleService.getRoleAdmin());
         userService.save(user);
         return Response.builder()
                 .code(200)
@@ -97,6 +98,7 @@ public class AuthService {
                 .token(jwtUtilService.generateToken(username))
                 .refreshToken(jwtUtilService.generateRefreshToken(username))
                 .profile(UserProfile.builder()
+                        .id(user.getId())
                         .firstname(user.getFirstname())
                         .lastname(user.getLastname())
                         .nickname(user.getNickname())

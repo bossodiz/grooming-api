@@ -23,7 +23,16 @@ public class RoleService {
         }
     }
 
-    public ERole getRoleUSER() throws DataNotFoundException {
+    public ERole getRoleAdmin() throws DataNotFoundException {
+        Optional<ERole> role = roleRepository.findByName(EnumUtil.Role.ADMIN.name());
+        if (role.isPresent()){
+            return role.get();
+        } else {
+            throw new DataNotFoundException("Role not found");
+        }
+    }
+
+    public ERole getRoleCUSTOMER() throws DataNotFoundException {
         Optional<ERole> role = roleRepository.findByName(EnumUtil.Role.CUSTOMER.name());
         if (role.isPresent()){
             return role.get();

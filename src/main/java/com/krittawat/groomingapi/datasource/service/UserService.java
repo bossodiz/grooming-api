@@ -1,21 +1,25 @@
 package com.krittawat.groomingapi.datasource.service;
 
+import com.krittawat.groomingapi.datasource.entity.ERole;
 import com.krittawat.groomingapi.datasource.entity.EUser;
 import com.krittawat.groomingapi.datasource.repository.UserRepository;
 import com.krittawat.groomingapi.error.DataNotFoundException;
+import com.krittawat.groomingapi.utils.EnumUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final RoleService roleService;
 
     public EUser findByUsername(String username) throws DataNotFoundException {
         Optional<EUser> user = userRepository.findByUsername(username);
-        if (user.isPresent()){
+        if (user.isPresent()) {
             return user.get();
         } else {
             throw new DataNotFoundException("User not found");
@@ -26,7 +30,13 @@ public class UserService {
         return userRepository.existsByUsername(username);
     }
 
-    public void save(EUser user) {
-        userRepository.save(user);
+    public EUser save(EUser user) {
+        return userRepository.save(user);
+    }
+
+    public List<EUser> findByCustomers() throws DataNotFoundException {
+        ERole roleCustomer = roleService.getRoleCUSTOMER();
+        return userRepository.findByRole(roleCustomer);
     }
 }
+
