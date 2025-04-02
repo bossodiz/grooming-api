@@ -38,5 +38,13 @@ public class UserService {
         ERole roleCustomer = roleService.getRoleCUSTOMER();
         return userRepository.findByRole(roleCustomer);
     }
+
+    public EUser findByCustomersId(Long id) throws DataNotFoundException {
+        return userRepository.findByid(id).orElseThrow(() -> new DataNotFoundException("User not found"));
+    }
+
+    public boolean existsByUsernameNotId(Long id, String phone) {
+        return userRepository.findByUsernameAndIdNot(phone, id).isPresent();
+    }
 }
 

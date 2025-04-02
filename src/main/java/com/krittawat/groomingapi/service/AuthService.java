@@ -12,8 +12,8 @@ import com.krittawat.groomingapi.error.BadRequestException;
 import com.krittawat.groomingapi.error.DataNotFoundException;
 import com.krittawat.groomingapi.error.TokenExpiredException;
 import com.krittawat.groomingapi.error.UnauthorizedException;
-import com.krittawat.groomingapi.service.model.RoleProfile;
-import com.krittawat.groomingapi.service.model.UserProfile;
+import com.krittawat.groomingapi.controller.response.RoleProfileResponse;
+import com.krittawat.groomingapi.controller.response.UserProfileResponse;
 import com.krittawat.groomingapi.utils.UtilService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -41,7 +41,7 @@ public class AuthService {
             return AuthResponse.builder()
                     .token(jwtUtilService.generateToken(request.getUsername()))
                     .refreshToken(jwtUtilService.generateRefreshToken(request.getUsername()))
-                    .profile(UserProfile.builder()
+                    .profile(UserProfileResponse.builder()
                             .id(user.getId())
                             .firstname(user.getFirstname())
                             .lastname(user.getLastname())
@@ -50,7 +50,7 @@ public class AuthService {
                             .email(user.getEmail())
                             .phone1(user.getPhone1())
                             .phone2(user.getPhone2())
-                            .role(RoleProfile.builder()
+                            .role(RoleProfileResponse.builder()
                                     .id(user.getRole().getId())
                                     .name(user.getRole().getName())
                                     .build())
@@ -97,7 +97,7 @@ public class AuthService {
         return AuthResponse.builder()
                 .token(jwtUtilService.generateToken(username))
                 .refreshToken(jwtUtilService.generateRefreshToken(username))
-                .profile(UserProfile.builder()
+                .profile(UserProfileResponse.builder()
                         .id(user.getId())
                         .firstname(user.getFirstname())
                         .lastname(user.getLastname())
@@ -106,7 +106,7 @@ public class AuthService {
                         .email(user.getEmail())
                         .phone1(user.getPhone1())
                         .phone2(user.getPhone2())
-                        .role(RoleProfile.builder()
+                        .role(RoleProfileResponse.builder()
                                 .id(user.getRole().getId())
                                 .name(user.getRole().getName())
                                 .description(user.getRole().getDescription())

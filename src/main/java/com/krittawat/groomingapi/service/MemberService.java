@@ -1,16 +1,16 @@
 package com.krittawat.groomingapi.service;
 
+import com.krittawat.groomingapi.controller.request.CustomerRequest;
 import com.krittawat.groomingapi.controller.request.RegisterRequest;
 import com.krittawat.groomingapi.controller.response.CustomerResponse;
-import com.krittawat.groomingapi.controller.response.RegisterResponse;
+import com.krittawat.groomingapi.controller.response.PetResponse;
 import com.krittawat.groomingapi.controller.response.Response;
+import com.krittawat.groomingapi.datasource.entity.EPet;
 import com.krittawat.groomingapi.datasource.entity.EUser;
+import com.krittawat.groomingapi.datasource.service.PetService;
 import com.krittawat.groomingapi.datasource.service.RoleService;
 import com.krittawat.groomingapi.datasource.service.UserService;
-import com.krittawat.groomingapi.error.BadRequestException;
 import com.krittawat.groomingapi.error.DataNotFoundException;
-import com.krittawat.groomingapi.service.model.RoleProfile;
-import com.krittawat.groomingapi.service.model.UserProfile;
 import com.krittawat.groomingapi.utils.UtilService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,22 +24,22 @@ public class MemberService {
 
     private final UserService userService;
     private final RoleService roleService;
+    private final PetService petService;
 
     @Transactional
-    public Response register(RegisterRequest request) throws BadRequestException, DataNotFoundException {
+    public Response register(RegisterRequest request) throws DataNotFoundException {
         if (userService.existsByUsername(request.getUsername().trim())) {
             EUser user = userService.findByUsername(request.getUsername().trim());
             return Response.builder()
                     .code(200)
                     .message("Phone is already taken")
-                    .data(RegisterResponse.builder()
+                    .data(CustomerResponse.builder()
                             .id(user.getId())
                             .firstname(user.getFirstname())
                             .lastname(user.getLastname())
-                            .nickname(user.getNickname())
-                            .email(user.getEmail())
-                            .phone1(user.getPhone1())
-                            .phone2(user.getPhone2())
+                            .name(user.getNickname())
+                            .phone(user.getPhone1())
+                            .phoneOther(user.getPhone2())
                             .build())
                     .build();
         }
@@ -58,14 +58,13 @@ public class MemberService {
         return Response.builder()
                 .code(200)
                 .message("User registered successfully")
-                .data(RegisterResponse.builder()
+                .data(CustomerResponse.builder()
                         .id(user.getId())
                         .firstname(user.getFirstname())
                         .lastname(user.getLastname())
-                        .nickname(user.getNickname())
-                        .email(user.getEmail())
-                        .phone1(user.getPhone1())
-                        .phone2(user.getPhone2())
+                        .name(user.getNickname())
+                        .phone(user.getPhone1())
+                        .phoneOther(user.getPhone2())
                         .build())
                 .build();
     }
@@ -89,5 +88,68 @@ public class MemberService {
                         .toArray(CustomerResponse[]::new))
                 .build();
 
+    }
+
+    public Response getCustomersById(Long id) throws DataNotFoundException {
+        EUser user = userService.findByCustomersId(id);
+        List<EPet> pets = petService.findByUser(user);
+        return Response.builder()
+                .code(200)
+                .message("Customer found")
+                .data(CustomerResponse.builder()
+                        .id(user.getId())
+                        .name(user.getNickname())
+                        .firstname(user.getFirstname())
+                        .lastname(user.getLastname())
+                        .phone(user.getUsername())
+                        .phoneOther(user.getPhone2())
+                        .email(user.getEmail())
+                        .serviceCount(user.getServiceCount())
+                        .createdDate(user.getCreatedDate())
+                        .lastedDate(user.getLastedDate())
+                        .pets(List.of(pets.stream().map(pet -> PetResponse.builder()
+                                        .id(pet.getId())
+                                        .name(pet.getName())
+                                        .age(pet.getAge())
+                                        .gender(pet.getGender().name())
+                                        .breed(pet.getPetBreed().getName())
+                                        .type(pet.getPetBreed().getPetType().getName())
+                                        .weight(UtilService.toString(pet.getWeight()))
+                                        .build())
+                                .toArray(PetResponse[]::new)))
+                        .build())
+                .build();
+    }
+
+    public Response updateCustomersById(Long id, CustomerRequest request) throws DataNotFoundException {
+        EUser user = userService.findByCustomersId(id);
+        if (userService.existsByUsernameNotId(id, request.getPhone())){
+            return Response.builder()
+                    .code(400)
+                    .message("Phone is already taken")
+                    .build();
+
+        };
+        user.setFirstname(UtilService.trimOrNull(request.getFirstname()));
+        user.setLastname(UtilService.trimOrNull(request.getLastname()));
+        user.setNickname(UtilService.trimOrNull(request.getName()));
+        user.setEmail(UtilService.trimOrNull(request.getEmail()));
+        user.setPhone1(UtilService.trimOrNull(request.getPhone()));
+        user.setPhone2(UtilService.trimOrNull(request.getPhone2()));
+        user.setUsername(UtilService.trimOrNull(request.getPhone()));
+        user = userService.save(user);
+        return Response.builder()
+                .code(200)
+                .message("Customer updated successfully")
+                .data(CustomerResponse.builder()
+                        .id(user.getId())
+                        .name(user.getNickname())
+                        .firstname(user.getFirstname())
+                        .lastname(user.getLastname())
+                        .phone(user.getUsername())
+                        .phoneOther(user.getPhone2())
+                        .email(user.getEmail())
+                        .build())
+                .build();
     }
 }

@@ -1,10 +1,10 @@
 package com.krittawat.groomingapi.datasource.repository;
 
-import com.krittawat.groomingapi.datasource.entity.EGroomingReserve;
+import com.krittawat.groomingapi.datasource.entity.EPetType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface PetTypeRepository extends JpaRepository<EGroomingReserve, Long> {
+public interface PetTypeRepository extends JpaRepository<EPetType, Long> {
 
 }

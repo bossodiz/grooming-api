@@ -1,7 +1,10 @@
 package com.krittawat.groomingapi.datasource.entity;
 
+import com.krittawat.groomingapi.utils.EnumUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -31,9 +34,10 @@ public class EPet implements java.io.Serializable {
     @Column(name = "name", nullable = false)
     private String name;
     @Column(name = "age")
-    private BigDecimal age;
+    private String age;
+    @Enumerated(EnumType.STRING)
     @Column(name = "gender")
-    private String gender;
+    private EnumUtil.GENDER gender;
     @ManyToOne
     @JoinColumn(name = "pet_breed_id", referencedColumnName = "id")
     private EPetBreed petBreed;
@@ -45,4 +49,6 @@ public class EPet implements java.io.Serializable {
     @CreationTimestamp
     @Column(name = "created_date")
     private Date createdDate;
+    @Column(name = "service_count")
+    private Integer serviceCount;
 }
