@@ -53,7 +53,7 @@ public class MemberService {
         user.setPhone1(UtilService.trimOrNull(request.getUsername()));
         user.setPhone2(UtilService.trimOrNull(request.getPhone2()));
         user.setRole(roleService.getRoleCUSTOMER());
-        user.setServiceCount(0);
+        user.setVisit(0);
         user = userService.save(user);
         return Response.builder()
                 .code(200)
@@ -81,7 +81,7 @@ public class MemberService {
                         .lastname(user.getLastname())
                         .phone(user.getUsername())
                         .phoneOther(user.getPhone2())
-                        .serviceCount(user.getServiceCount())
+                        .serviceCount(user.getVisit())
                         .createdDate(user.getCreatedDate())
                         .lastedDate(user.getLastedDate())
                         .build())
@@ -104,7 +104,7 @@ public class MemberService {
                         .phone(user.getUsername())
                         .phoneOther(user.getPhone2())
                         .email(user.getEmail())
-                        .serviceCount(user.getServiceCount())
+                        .serviceCount(user.getVisit())
                         .createdDate(user.getCreatedDate())
                         .lastedDate(user.getLastedDate())
                         .pets(List.of(pets.stream().map(pet -> PetResponse.builder()

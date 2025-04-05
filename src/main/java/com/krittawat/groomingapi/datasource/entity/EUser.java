@@ -13,7 +13,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -51,6 +50,6 @@ public class EUser {
     private LocalDateTime createdDate;
     @Column(name = "lasted_date")
     private LocalDateTime lastedDate;
-    @Column(name = "service_count")
-    private Integer serviceCount;
+    @Column(name = "visit")
+    private Integer visit;
 }
