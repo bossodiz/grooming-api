@@ -20,4 +20,5 @@ public class CustomerResponse {
     private LocalDateTime createdDate;
     private LocalDateTime lastedDate;
     private List<PetResponse> pets;
+    private String remark;
 }

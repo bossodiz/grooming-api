@@ -84,6 +84,17 @@ public class MemberService {
                         .serviceCount(user.getVisit())
                         .createdDate(user.getCreatedDate())
                         .lastedDate(user.getLastedDate())
+                        .remark(user.getRemark())
+                        .pets(List.of(user.getPets().stream().map(pet -> PetResponse.builder()
+                                        .id(pet.getId())
+                                        .name(pet.getName())
+                                        .age(pet.getAge())
+                                        .gender(pet.getGender().name())
+                                        .breed(pet.getPetBreed().getName())
+                                        .type(pet.getPetBreed().getPetType().getName())
+                                        .weight(UtilService.toString(pet.getWeight()))
+                                        .build())
+                                .toArray(PetResponse[]::new)))
                         .build())
                         .toArray(CustomerResponse[]::new))
                 .build();
@@ -107,6 +118,7 @@ public class MemberService {
                         .serviceCount(user.getVisit())
                         .createdDate(user.getCreatedDate())
                         .lastedDate(user.getLastedDate())
+                        .remark(user.getRemark())
                         .pets(List.of(pets.stream().map(pet -> PetResponse.builder()
                                         .id(pet.getId())
                                         .name(pet.getName())
@@ -150,6 +162,51 @@ public class MemberService {
                         .phoneOther(user.getPhone2())
                         .email(user.getEmail())
                         .build())
+                .build();
+    }
+
+    public Response updateCustomersRemarkById(Long id, CustomerRequest request) throws DataNotFoundException {
+        EUser user = userService.findByCustomersId(id);
+        user.setRemark(UtilService.trimOrNull(request.getRemark()));
+        user = userService.save(user);
+        return Response.builder()
+                .code(200)
+                .message("Customer updated successfully")
+                .data(CustomerResponse.builder()
+                        .remark(user.getRemark())
+                        .build())
+                .build();
+    }
+
+    public Response getCustomersRemarkById(Long id) throws DataNotFoundException {
+        EUser user = userService.findByCustomersId(id);
+        return Response.builder()
+                .code(200)
+                .message("Customers found")
+                .data(CustomerResponse.builder()
+                    .id(user.getId())
+                    .remark(user.getRemark())
+                    .build())
+                .build();
+    }
+
+    public Response getPetsByCustomerId(Long id) throws DataNotFoundException {
+        EUser user = userService.findByCustomersId(id);
+        List<EPet> pets = petService.findByUser(user);
+        return Response.builder()
+                .code(200)
+                .message("Pets found")
+                .data(pets.stream().map(pet ->
+                        PetResponse.builder()
+                                .id(pet.getId())
+                                .name(pet.getName())
+                                .age(pet.getAge())
+                                .gender(pet.getGender().name())
+                                .breed(pet.getPetBreed().getName())
+                                .type(pet.getPetBreed().getPetType().getName())
+                                .weight(UtilService.toString(pet.getWeight()))
+                                .service(UtilService.toString(pet.getServiceCount()))
+                                .build()))
                 .build();
     }
 }

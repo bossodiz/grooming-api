@@ -29,4 +29,8 @@ public class EnumUtil {
         BAHT, PERCENT, FREE
     }
 
+    public enum LOCALE {
+        TH, EN
+    }
+
 }

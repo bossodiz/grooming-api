@@ -40,4 +40,19 @@ public class MemberController {
     public Response updateCustomersById(@PathVariable Long id, @RequestBody CustomerRequest request) throws DataNotFoundException, BadRequestException {
         return memberService.updateCustomersById(id, request);
     }
+
+    @PatchMapping("/customers/remark/{id}")
+    public Response updateCustomersRemarkById(@PathVariable Long id, @RequestBody CustomerRequest request) throws DataNotFoundException, BadRequestException {
+        return memberService.updateCustomersRemarkById(id, request);
+    }
+
+    @GetMapping("/customers/remark/{id}")
+    public Response getCustomersRemarkById(@PathVariable Long id) throws DataNotFoundException {
+        return memberService.getCustomersRemarkById(id);
+    }
+
+    @GetMapping("/customers/{id}/pets")
+    public Response getPetsByCustomerId(@PathVariable Long id) throws DataNotFoundException {
+        return memberService.getPetsByCustomerId(id);
+    }
 }

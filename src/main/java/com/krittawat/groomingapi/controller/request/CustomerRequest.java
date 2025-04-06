@@ -10,4 +10,5 @@ public class CustomerRequest {
     private String email;
     private String phone;
     private String phone2;
+    private String remark;
 }

@@ -14,5 +14,8 @@ public class UtilService {
         return df.format(value);
     }
 
-
+    public static String toString(Integer value) {
+        if (value == null) return "0";
+        return String.valueOf(value);
+    }
 }

@@ -33,4 +33,6 @@ public class EPetBreed implements java.io.Serializable {
     @ManyToOne
     @JoinColumn(name = "pet_type_id", referencedColumnName = "id")
     private EPetType petType;
+    @Column(name = "image")
+    private String image;
 }
