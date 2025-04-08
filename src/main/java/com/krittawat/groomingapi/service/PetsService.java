@@ -1,6 +1,7 @@
 package com.krittawat.groomingapi.service;
 
 import com.krittawat.groomingapi.controller.request.PetRequest;
+import com.krittawat.groomingapi.controller.response.CustomerResponse;
 import com.krittawat.groomingapi.controller.response.PetResponse;
 import com.krittawat.groomingapi.controller.response.Response;
 import com.krittawat.groomingapi.datasource.entity.EPet;
@@ -9,6 +10,7 @@ import com.krittawat.groomingapi.datasource.entity.EUser;
 import com.krittawat.groomingapi.datasource.service.PetService;
 import com.krittawat.groomingapi.datasource.service.UserService;
 import com.krittawat.groomingapi.error.DataNotFoundException;
+import com.krittawat.groomingapi.utils.UtilService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -37,6 +39,7 @@ public class PetsService {
         pet.setServiceCount(0);
         pet.setUser(user);
         pet = petService.insert(pet);
+        EPet finalPet = pet;
         return Response.builder()
                 .code(200)
                 .message("Pet added successfully")
@@ -46,12 +49,39 @@ public class PetsService {
                         .ageYear(pet.getAgeYear())
                         .ageMonth(pet.getAgeMonth())
                         .gender(pet.getGender().name())
-                        .breedNameTh(pet.getPetBreed().getNameTh())
-                        .breedNameEn(pet.getPetBreed().getNameEn())
-                        .typeNameTh(pet.getPetBreed().getPetType().getNameTh())
-                        .typeNameEn(pet.getPetBreed().getPetType().getNameEn())
+                        .breedNameTh(UtilService.getNameThDefaulterDash(pet::getPetBreed))
+                        .breedNameEn(UtilService.getNameEnDefaulterDash(pet::getPetBreed))
+                        .typeNameTh(UtilService.getNameThDefaulterDash(() -> finalPet.getPetBreed().getPetType()))
+                        .typeNameEn(UtilService.getNameEnDefaulterDash(() -> finalPet.getPetBreed().getPetType()))
                         .breedId(pet.getPetBreed().getId())
                         .typeId(pet.getPetBreed().getPetType().getId())
+                        .weight(UtilService.toString(pet.getWeight()))
+                        .service(UtilService.toStringDefaulterZero(pet.getServiceCount()))
                 ).build();
+    }
+
+    public Response getPets() {
+        List<EPet> list = petService.findAll();
+        return Response.builder()
+                .code(200)
+                .message("pets found")
+                .data(list.stream().map(pet -> PetResponse.builder()
+                                .id(pet.getId())
+                                .name(pet.getName())
+                                .ageYear(pet.getAgeYear())
+                                .ageMonth(pet.getAgeMonth())
+                                .gender(pet.getGender().name())
+                                .genderTh(UtilService.getNameThDefaulterDash(pet.getGender()))
+                                .genderEn(UtilService.getNameEnDefaulterDash(pet.getGender()))
+                                .breedNameTh(UtilService.getNameThDefaulterDash(pet::getPetBreed))
+                                .breedNameEn(UtilService.getNameEnDefaulterDash(pet::getPetBreed))
+                                .typeNameTh(UtilService.getNameThDefaulterDash(() -> pet.getPetBreed().getPetType()))
+                                .typeNameEn(UtilService.getNameEnDefaulterDash(() -> pet.getPetBreed().getPetType()))
+                                .breedId(pet.getPetBreed().getId())
+                                .typeId(pet.getPetBreed().getPetType().getId())
+                                .weight(UtilService.toStringDefaulterDash(pet.getWeight()))
+                                .service(UtilService.toStringDefaulterZero(pet.getServiceCount()))
+                                .build()))
+                .build();
     }
 }

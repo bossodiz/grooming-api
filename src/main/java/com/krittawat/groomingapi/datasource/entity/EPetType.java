@@ -17,7 +17,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "pet_type")
-public class EPetType implements java.io.Serializable {
+public class EPetType implements java.io.Serializable, LocalizedName {
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)

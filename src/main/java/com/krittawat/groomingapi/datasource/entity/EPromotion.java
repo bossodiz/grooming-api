@@ -23,7 +23,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "promotion")
-public class EPromotion implements java.io.Serializable {
+public class EPromotion implements java.io.Serializable, LocalizedName {
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -2,11 +2,9 @@ package com.krittawat.groomingapi.datasource.service;
 
 import com.krittawat.groomingapi.datasource.entity.EPet;
 import com.krittawat.groomingapi.datasource.entity.EPetBreed;
-import com.krittawat.groomingapi.datasource.entity.EPetType;
 import com.krittawat.groomingapi.datasource.entity.EUser;
 import com.krittawat.groomingapi.datasource.repository.PetBreedRepository;
 import com.krittawat.groomingapi.datasource.repository.PetRepository;
-import com.krittawat.groomingapi.datasource.repository.PetTypeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +31,10 @@ public class PetService {
 
     public Optional<EPetBreed> findBreedById(Long id) {
         return petBreedRepository.findById(id);
+    }
+
+    public List<EPet> findAll() {
+        return petRepository.findAll();
     }
 
 }

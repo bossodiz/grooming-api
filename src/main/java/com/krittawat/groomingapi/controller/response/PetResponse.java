@@ -13,6 +13,8 @@ public class PetResponse {
     private String gender;
     private Long breedId;
     private Long typeId;
+    private String genderTh;
+    private String genderEn;
     private String breedNameTh;
     private String breedNameEn;
     private String typeNameTh;

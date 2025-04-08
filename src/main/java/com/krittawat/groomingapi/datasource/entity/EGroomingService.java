@@ -21,7 +21,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "grooming_service")
-public class EGroomingService implements java.io.Serializable {
+public class EGroomingService implements java.io.Serializable, LocalizedName {
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)

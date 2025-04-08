@@ -129,7 +129,7 @@ public class MemberService {
                     .message("Phone is already taken")
                     .build();
 
-        };
+        }
         user.setFirstname(UtilService.trimOrNull(request.getFirstname()));
         user.setLastname(UtilService.trimOrNull(request.getLastname()));
         user.setNickname(UtilService.trimOrNull(request.getName()));
@@ -191,14 +191,16 @@ public class MemberService {
                                 .ageYear(pet.getAgeYear())
                                 .ageMonth(pet.getAgeMonth())
                                 .gender(pet.getGender().name())
-                                .breedNameTh(pet.getPetBreed().getNameTh())
-                                .breedNameEn(pet.getPetBreed().getNameEn())
-                                .typeNameTh(pet.getPetBreed().getPetType().getNameTh())
-                                .typeNameEn(pet.getPetBreed().getPetType().getNameEn())
+                                .genderTh(UtilService.getNameThDefaulterDash(pet.getGender()))
+                                .genderEn(UtilService.getNameEnDefaulterDash(pet.getGender()))
+                                .breedNameTh(UtilService.getNameThDefaulterDash(pet::getPetBreed))
+                                .breedNameEn(UtilService.getNameEnDefaulterDash(pet::getPetBreed))
+                                .typeNameTh(UtilService.getNameThDefaulterDash(() -> pet.getPetBreed().getPetType()))
+                                .typeNameEn(UtilService.getNameEnDefaulterDash(() -> pet.getPetBreed().getPetType()))
                                 .breedId(pet.getPetBreed().getId())
                                 .typeId(pet.getPetBreed().getPetType().getId())
-                                .weight(UtilService.toString(pet.getWeight()))
-                                .service(UtilService.toString(pet.getServiceCount()))
+                                .weight(UtilService.toStringDefaulterDash(pet.getWeight()))
+                                .service(UtilService.toStringDefaulterZero(pet.getServiceCount()))
                                 .build()))
                 .build();
     }
