@@ -8,10 +8,15 @@ import lombok.Data;
 public class PetResponse {
     private Long id;
     private String name;
-    private String age;
+    private Integer ageYear;
+    private Integer ageMonth;
     private String gender;
-    private String breed;
-    private String type;
+    private Long breedId;
+    private Long typeId;
+    private String breedNameTh;
+    private String breedNameEn;
+    private String typeNameTh;
+    private String typeNameEn;
     private String weight;
     private String service;
 }

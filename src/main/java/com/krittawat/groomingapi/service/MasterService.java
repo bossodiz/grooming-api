@@ -6,11 +6,9 @@ import com.krittawat.groomingapi.datasource.entity.EPetBreed;
 import com.krittawat.groomingapi.datasource.entity.EPetType;
 import com.krittawat.groomingapi.datasource.service.PetBreedService;
 import com.krittawat.groomingapi.datasource.service.PetTypeService;
-import com.krittawat.groomingapi.utils.EnumUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -19,8 +17,6 @@ public class MasterService {
 
     private final PetTypeService petTypeService;
     private final PetBreedService petBreedService;
-
-
 
     public Response getPetType() {
         List<EPetType> list = petTypeService.getAll();

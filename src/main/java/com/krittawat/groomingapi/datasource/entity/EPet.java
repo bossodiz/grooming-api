@@ -33,8 +33,10 @@ public class EPet implements java.io.Serializable {
     private Long id;
     @Column(name = "name", nullable = false)
     private String name;
-    @Column(name = "age")
-    private String age;
+    @Column(name = "age_year")
+    private Integer ageYear;
+    @Column(name = "age_mouth")
+    private Integer ageMonth;
     @Enumerated(EnumType.STRING)
     @Column(name = "gender")
     private EnumUtil.GENDER gender;

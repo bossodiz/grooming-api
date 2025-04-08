@@ -1,12 +1,10 @@
 package com.krittawat.groomingapi.controller;
 
 import com.krittawat.groomingapi.controller.response.Response;
-import com.krittawat.groomingapi.error.DataNotFoundException;
 import com.krittawat.groomingapi.service.MasterService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -24,7 +22,5 @@ public class MasterController {
     public Response getPetBreed() {
         return masterService.getPetBreed();
     }
-
-
 
 }
