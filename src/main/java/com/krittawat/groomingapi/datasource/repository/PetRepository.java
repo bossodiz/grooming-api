@@ -13,6 +13,6 @@ public interface PetRepository extends JpaRepository<EPet, Long> {
 
     List<EPet> findByUser(EUser user);
 
-    @Query("SELECT p FROM EPet p WHERE p.user.id = ?1 AND p.name = ?2")
+    @Query("SELECT p FROM EPet p WHERE p.user = ?1 AND p.name = ?2")
     List<EPet> findByUserAndName(EUser user, String name);
 }

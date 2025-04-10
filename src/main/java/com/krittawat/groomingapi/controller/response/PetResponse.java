@@ -3,6 +3,8 @@ package com.krittawat.groomingapi.controller.response;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 @Builder
 public class PetResponse {
@@ -21,4 +23,8 @@ public class PetResponse {
     private String typeNameEn;
     private String weight;
     private String service;
+    private LocalDateTime lastedServiceDate;
+    private Long customerId;
+    private String customerName;
+    private String customerPhone;
 }

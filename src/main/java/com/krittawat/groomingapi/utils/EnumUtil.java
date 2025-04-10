@@ -22,7 +22,8 @@ public class EnumUtil {
     @AllArgsConstructor
     public enum GENDER {
         MALE("ผู้", "Male"),
-        FEMALE("เมีย", "Female");
+        FEMALE("เมีย", "Female"),
+        UNKNOWN("-","-");
         private final String nameTh;
         private final String nameEn;
     }

@@ -2,7 +2,7 @@ spring:
   jackson:
     time-zone: Asia/Bangkok
   datasource:
-    url: jdbc:mysql://localhost:3306/dev?useUnicode=yes&characterEncoding=UTF-8&connectTimeout=0&socketTimeout=0&autoReconnect=true&useSSL=false
+    url: jdbc:mysql://localhost:3306/dev
     username: admin
     password: 1234
     driver-class-name: com.mysql.jdbc.Driver

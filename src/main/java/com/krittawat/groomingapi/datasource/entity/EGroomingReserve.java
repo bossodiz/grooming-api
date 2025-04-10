@@ -1,21 +1,14 @@
 package com.krittawat.groomingapi.datasource.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
-import java.sql.Date;
 import java.sql.Time;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -41,7 +34,7 @@ public class EGroomingReserve implements java.io.Serializable {
     @JoinColumn(name = "pet_breed_id", referencedColumnName = "id")
     private EPetBreed petBreed;
     @Column(name = "reserve_date")
-    private Date reserveDate;
+    private LocalDateTime reserveDate;
     @Column(name = "reserve_time")
     private Time reserveTime;
     @ManyToOne

@@ -81,4 +81,16 @@ public class UtilService {
         }
     }
 
+    public static String getEnum(Enum<?> e) {
+        if (e == null) return null;
+        return e.name();
+    }
+
+    public static BigDecimal toBigDecimal(String weight) {
+        if (StringUtils.hasText(weight)) {
+            return new BigDecimal(weight);
+        } else {
+            return null;
+        }
+    }
 }

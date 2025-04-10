@@ -1,16 +1,7 @@
 package com.krittawat.groomingapi.datasource.entity;
 
 import com.krittawat.groomingapi.utils.EnumUtil;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,7 +9,7 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -35,7 +26,7 @@ public class EPet implements java.io.Serializable {
     private String name;
     @Column(name = "age_year")
     private Integer ageYear;
-    @Column(name = "age_mouth")
+    @Column(name = "age_month")
     private Integer ageMonth;
     @Enumerated(EnumType.STRING)
     @Column(name = "gender")
@@ -50,7 +41,9 @@ public class EPet implements java.io.Serializable {
     private EUser user;
     @CreationTimestamp
     @Column(name = "created_date")
-    private Date createdDate;
+    private LocalDateTime createdDate;
     @Column(name = "service_count")
     private Integer serviceCount;
+    @Column(name = "last_update_year")
+    private LocalDateTime lastUpdateYear;
 }

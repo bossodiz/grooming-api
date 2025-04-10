@@ -23,4 +23,15 @@ public class PetsController {
     public Response add(@RequestBody PetRequest request) throws DataNotFoundException {
         return petsService.add(request);
     }
+
+    @GetMapping("/{id}")
+    public Response getPetById(@PathVariable Long id) throws DataNotFoundException {
+        return petsService.getPetById(id);
+    }
+
+
+    @PutMapping("/update")
+    public Response update(@RequestBody PetRequest request) throws DataNotFoundException {
+        return petsService.update(request);
+    }
 }

@@ -22,10 +22,10 @@ public class PetService {
     }
 
     public List<EPet> findByUserAndName(EUser user, String name) {
-        return petRepository.findByUser(user);
+        return petRepository.findByUserAndName(user, name);
     }
 
-    public EPet insert(EPet pet) {
+    public EPet save(EPet pet) {
         return petRepository.save(pet);
     }
 
@@ -35,6 +35,10 @@ public class PetService {
 
     public List<EPet> findAll() {
         return petRepository.findAll();
+    }
+
+    public Optional<EPet> findById(Long id) {
+        return petRepository.findById(id);
     }
 
 }

@@ -1,13 +1,6 @@
 package com.krittawat.groomingapi.datasource.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,7 +8,7 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -40,10 +33,10 @@ public class EInvoice implements java.io.Serializable {
     @Column(name = "payment_status")
     private Integer paymentStatus;
     @Column(name = "payment_date")
-    private Date paymentDate;
+    private LocalDateTime paymentDate;
     @Column(name = "remark")
     private String remark;
     @CreationTimestamp
     @Column(name = "created_date")
-    private Date createdDate;
+    private LocalDateTime createdDate;
 }
