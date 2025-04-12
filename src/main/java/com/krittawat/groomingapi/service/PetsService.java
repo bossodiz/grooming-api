@@ -5,6 +5,7 @@ import com.krittawat.groomingapi.controller.response.PetResponse;
 import com.krittawat.groomingapi.controller.response.Response;
 import com.krittawat.groomingapi.datasource.entity.EPet;
 import com.krittawat.groomingapi.datasource.entity.EPetBreed;
+import com.krittawat.groomingapi.datasource.entity.EPetType;
 import com.krittawat.groomingapi.datasource.entity.EUser;
 import com.krittawat.groomingapi.datasource.service.PetService;
 import com.krittawat.groomingapi.datasource.service.UserService;
@@ -35,6 +36,11 @@ public class PetsService {
                     .orElseThrow(() -> new DataNotFoundException("Breed not found"));
             pet.setPetBreed(breed);
         }
+        if (request.getType() != null && request.getType() != 0L) {
+            EPetType type = petService.findTypeById(request.getType())
+                    .orElseThrow(() -> new DataNotFoundException("Type not found"));
+            pet.setPetType(type);
+        }
         pet.setName(request.getName());
         pet.setAgeMonth(request.getAgeMonth() == null ? 0 : request.getAgeMonth());
         pet.setAgeYear(request.getAgeYear() == null ? 0 : request.getAgeYear());
@@ -43,27 +49,11 @@ public class PetsService {
         pet.setWeight(UtilService.toBigDecimal(request.getWeight()));
         pet.setServiceCount(0);
         pet.setUser(user);
-        pet = petService.save(pet);
-        EPet finalPet = pet;
+        petService.save(pet);
         return Response.builder()
                 .code(200)
                 .message("Pet added successfully")
-                .data(PetResponse.builder()
-                        .id(pet.getId())
-                        .name(pet.getName())
-                        .ageYear(pet.getAgeYear())
-                        .ageMonth(pet.getAgeMonth())
-                        .gender(pet.getGender().name())
-                        .breedNameTh(UtilService.getNameThDefaulterDash(pet::getPetBreed))
-                        .breedNameEn(UtilService.getNameEnDefaulterDash(pet::getPetBreed))
-                        .typeNameTh(UtilService.getNameThDefaulterDash(() -> finalPet.getPetBreed().getPetType()))
-                        .typeNameEn(UtilService.getNameEnDefaulterDash(() -> finalPet.getPetBreed().getPetType()))
-                        .breedId(pet.getPetBreed() != null ? pet.getPetBreed().getId() : null)
-                        .typeId(pet.getPetBreed() != null ? pet.getPetBreed().getPetType() != null ? pet.getPetBreed().getPetType().getId() : null : null)
-                        .weight(UtilService.toString(pet.getWeight()))
-                        .service(UtilService.toStringDefaulterZero(pet.getServiceCount()))
-                        .build()
-                ).build();
+                .build();
     }
 
     public Response getPets() {
@@ -81,10 +71,10 @@ public class PetsService {
                                 .genderEn(UtilService.getNameEnDefaulterDash(pet.getGender()))
                                 .breedNameTh(UtilService.getNameThDefaulterDash(pet::getPetBreed))
                                 .breedNameEn(UtilService.getNameEnDefaulterDash(pet::getPetBreed))
-                                .typeNameTh(UtilService.getNameThDefaulterDash(() -> pet.getPetBreed().getPetType()))
-                                .typeNameEn(UtilService.getNameEnDefaulterDash(() -> pet.getPetBreed().getPetType()))
-                                .breedId(pet.getPetBreed() != null ? pet.getPetBreed().getId() : null)
-                                .typeId(pet.getPetBreed() != null ? pet.getPetBreed().getPetType() != null ? pet.getPetBreed().getPetType().getId() : null : null)
+                                .typeNameTh(UtilService.getNameThDefaulterDash(pet::getPetType))
+                                .typeNameEn(UtilService.getNameEnDefaulterDash(pet::getPetType))
+                                .breedId(pet.getBreedId())
+                                .typeId(pet.getTypeId())
                                 .weight(UtilService.toStringDefaulterDash(pet.getWeight()))
                                 .service(UtilService.toStringDefaulterZero(pet.getServiceCount()))
                                 .build()))
@@ -94,6 +84,7 @@ public class PetsService {
     public Response getPetById(Long id) throws DataNotFoundException {
         EPet pet = petService.findById(id)
                 .orElseThrow(() -> new DataNotFoundException("Pet not found"));
+
         return Response.builder()
                 .code(200)
                 .message("Pet found")
@@ -105,12 +96,12 @@ public class PetsService {
                         .gender(pet.getGender().name())
                         .genderTh(UtilService.getNameThDefaulterDash(pet.getGender()))
                         .genderEn(UtilService.getNameEnDefaulterDash(pet.getGender()))
-                        .breedId(pet.getPetBreed().getId())
+                        .breedId(pet.getBreedId())
                         .breedNameTh(UtilService.getNameThDefaulterDash(pet::getPetBreed))
                         .breedNameEn(UtilService.getNameEnDefaulterDash(pet::getPetBreed))
-                        .typeId(pet.getPetBreed().getPetType().getId())
-                        .typeNameTh(UtilService.getNameThDefaulterDash(() -> pet.getPetBreed().getPetType()))
-                        .typeNameEn(UtilService.getNameEnDefaulterDash(() -> pet.getPetBreed().getPetType()))
+                        .typeId(pet.getTypeId())
+                        .typeNameTh(UtilService.getNameThDefaulterDash(pet::getPetType))
+                        .typeNameEn(UtilService.getNameEnDefaulterDash(pet::getPetType))
                         .weight(UtilService.toString(pet.getWeight()))
                         .service(UtilService.toStringDefaulterZero(pet.getServiceCount()))
                         .lastedServiceDate(LocalDateTime.now())
@@ -130,32 +121,23 @@ public class PetsService {
                     .orElseThrow(() -> new DataNotFoundException("Breed not found"));
             pet.setPetBreed(breed);
         }
+        if (request.getType() == null || request.getType() == 0L) {
+            pet.setPetType(null);
+        } else {
+            EPetType type = petService.findTypeById(request.getType())
+                    .orElseThrow(() -> new DataNotFoundException("Type not found"));
+            pet.setPetType(type);
+        }
         pet.setName(request.getName());
         pet.setAgeMonth(request.getAgeMonth() == null ? 0 : request.getAgeMonth());
         pet.setAgeYear(request.getAgeYear() == null ? 0 : request.getAgeYear());
         pet.setLastUpdateYear(LocalDateTime.now());
         pet.setGender(request.getGender());
         pet.setWeight(new BigDecimal(request.getWeight()));
-        pet = petService.save(pet);
-        EPet finalPet = pet;
+        petService.save(pet);
         return Response.builder()
                 .code(200)
                 .message("Pet update successfully")
-                .data(PetResponse.builder()
-                        .id(pet.getId())
-                        .name(pet.getName())
-                        .ageYear(pet.getAgeYear())
-                        .ageMonth(pet.getAgeMonth())
-                        .gender(pet.getGender().name())
-                        .breedNameTh(UtilService.getNameThDefaulterDash(pet::getPetBreed))
-                        .breedNameEn(UtilService.getNameEnDefaulterDash(pet::getPetBreed))
-                        .typeNameTh(UtilService.getNameThDefaulterDash(() -> finalPet.getPetBreed().getPetType()))
-                        .typeNameEn(UtilService.getNameEnDefaulterDash(() -> finalPet.getPetBreed().getPetType()))
-                        .breedId(pet.getPetBreed().getId())
-                        .typeId(pet.getPetBreed().getPetType().getId())
-                        .weight(UtilService.toString(pet.getWeight()))
-                        .service(UtilService.toStringDefaulterZero(pet.getServiceCount()))
-                        .build()
-                ).build();
+                .build();
     }
 }

@@ -46,4 +46,15 @@ public class EPet implements java.io.Serializable {
     private Integer serviceCount;
     @Column(name = "last_update_year")
     private LocalDateTime lastUpdateYear;
+    @ManyToOne
+    @JoinColumn(name = "pet_type_id", referencedColumnName = "id")
+    private EPetType petType;
+
+    public Long getBreedId() {
+        return petBreed == null ? null : petBreed.getId();
+    }
+
+    public Long getTypeId() {
+        return petType == null ? null : petType.getId();
+    }
 }
