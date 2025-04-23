@@ -93,7 +93,7 @@ public class PetsService {
                         .name(pet.getName())
                         .ageYear(pet.getAgeYear())
                         .ageMonth(pet.getAgeMonth())
-                        .gender(pet.getGender().name())
+                        .gender(UtilService.getEnum(pet.getGender()))
                         .genderTh(UtilService.getNameThDefaulterDash(pet.getGender()))
                         .genderEn(UtilService.getNameEnDefaulterDash(pet.getGender()))
                         .breedId(pet.getBreedId())

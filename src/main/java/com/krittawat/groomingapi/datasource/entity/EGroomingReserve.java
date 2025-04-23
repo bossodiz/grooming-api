@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
-import java.sql.Time;
 import java.time.LocalDateTime;
 
 @Entity
@@ -23,8 +22,8 @@ public class EGroomingReserve implements java.io.Serializable {
     @ManyToOne
     @JoinColumn(name = "customer_id", referencedColumnName = "id")
     private EUser customer;
-    @Column(name = "customer_other")
-    private String customerOther;
+    @Column(name = "pet_other_name")
+    private String petOtherName;
     @Column(name = "phone")
     private String phone;
     @ManyToOne
@@ -33,10 +32,10 @@ public class EGroomingReserve implements java.io.Serializable {
     @ManyToOne
     @JoinColumn(name = "pet_breed_id", referencedColumnName = "id")
     private EPetBreed petBreed;
-    @Column(name = "reserve_date")
-    private LocalDateTime reserveDate;
-    @Column(name = "reserve_time")
-    private Time reserveTime;
+    @Column(name = "reserve_date_start")
+    private LocalDateTime reserveDateStart;
+    @Column(name = "reserve_date_end")
+    private LocalDateTime reserveDateEnd;
     @ManyToOne
     @JoinColumn(name = "grooming_service_id", referencedColumnName = "id")
     private EGroomingService groomingService;

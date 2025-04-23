@@ -23,4 +23,9 @@ public class MasterController {
         return masterService.getPetBreed();
     }
 
+    @GetMapping("/pet-list")
+    public Response getPetList() {
+        return masterService.getPetList();
+    }
+
 }

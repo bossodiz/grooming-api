@@ -10,6 +10,8 @@ import lombok.Data;
 public class DropdownResponse {
     private Long key;
     private Long ref_key;
+    private Long ref_key2;
+    private String ref_key3;
     private String value_th;
     private String value_en;
     private String image_url;
