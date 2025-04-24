@@ -15,4 +15,8 @@ public class PetBreedService {
     public List<EPetBreed> getAll(){
         return petBreedRepository.findAll();
     }
+
+    public EPetBreed getById(Long id) {
+        return petBreedRepository.findById(id).orElse(null);
+    }
 }

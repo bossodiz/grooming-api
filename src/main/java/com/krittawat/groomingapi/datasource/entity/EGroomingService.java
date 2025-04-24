@@ -37,4 +37,6 @@ public class EGroomingService implements java.io.Serializable, LocalizedName {
     private BigDecimal price;
     @Column(name = "remark")
     private String remark;
+    @Column(name = "sequence")
+    private Integer sequence;
 }

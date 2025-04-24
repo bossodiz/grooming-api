@@ -20,10 +20,10 @@ public class EGroomingReserve implements java.io.Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @ManyToOne
-    @JoinColumn(name = "customer_id", referencedColumnName = "id")
-    private EUser customer;
-    @Column(name = "pet_other_name")
-    private String petOtherName;
+    @JoinColumn(name = "pet_id", referencedColumnName = "id")
+    private EPet pet;
+    @Column(name = "pet_name")
+    private String petName;
     @Column(name = "phone")
     private String phone;
     @ManyToOne
@@ -42,4 +42,8 @@ public class EGroomingReserve implements java.io.Serializable {
     @CreationTimestamp
     @Column(name = "created_date")
     private String createdDate;
+    @Column(name = "color")
+    private String color;
+    @Column(name = "note")
+    private String note;
 }

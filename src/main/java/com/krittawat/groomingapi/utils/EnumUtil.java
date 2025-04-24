@@ -75,4 +75,11 @@ public class EnumUtil {
         private final String nameEn;
     }
 
+    @Getter
+    @AllArgsConstructor
+    public enum RESERVATION_TYPE {
+        GROOMING("Grooming", "Grooming");
+        private final String nameTh;
+        private final String nameEn;
+    }
 }

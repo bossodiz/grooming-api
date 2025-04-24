@@ -17,5 +17,9 @@ public class PetTypeService {
         return petTypeRepository.findAll();
     }
 
+    public EPetType getById(Long id) {
+        return petTypeRepository.findById(id).orElse(null);
+    }
+
 
 }
