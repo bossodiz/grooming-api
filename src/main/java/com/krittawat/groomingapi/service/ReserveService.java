@@ -106,4 +106,39 @@ public class ReserveService {
     }
 
 
+    public Response updateReserveGrooming(ReserveRequest request) {
+        EGroomingReserve eGroomingReserve = groomingReserveService.getById(request.getId());
+        eGroomingReserve.setReserveDateStart(LocalDateTime.parse(request.getStart()));
+        eGroomingReserve.setReserveDateEnd(LocalDateTime.parse(request.getEnd()));
+        eGroomingReserve = groomingReserveService.save(eGroomingReserve);
+        return Response.builder()
+                .code(200)
+                .message("OK")
+                .data(ReserveGroomingResponse.builder()
+                        .className(eGroomingReserve.getColor())
+                        .title(EnumUtil.RESERVATION_TYPE.GROOMING.name())
+                        .start(eGroomingReserve.getReserveDateStart().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+                        .end(eGroomingReserve.getReserveDateEnd().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+                        .extendedProps(ReserveGroomingResponse.ExtendedProps.builder()
+                                .id(eGroomingReserve.getId())
+                                .pet(eGroomingReserve.getPet() != null ? eGroomingReserve.getPet().getId() : null)
+                                .petName(eGroomingReserve.getPet() != null ? eGroomingReserve.getPet().getName() : eGroomingReserve.getPetName() != null ? eGroomingReserve.getPetName() : null)
+                                .phone(eGroomingReserve.getPhone())
+                                .petType(eGroomingReserve.getPetType() != null ? eGroomingReserve.getPetType().getId() : null)
+                                .petBreed(eGroomingReserve.getPetBreed() != null ? eGroomingReserve.getPetBreed().getId() : null)
+                                .serviceId(eGroomingReserve.getGroomingService().getId())
+                                .serviceName(eGroomingReserve.getGroomingService().getNameTh())
+                                .note(eGroomingReserve.getNote())
+                                .build())
+                        .build())
+                .build();
+    }
+
+    public Response deleteReserveGrooming(Long id) {
+        groomingReserveService.deleteById(id);
+        return Response.builder()
+                .code(200)
+                .message("OK")
+                .build();
+    }
 }

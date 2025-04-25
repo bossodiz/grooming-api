@@ -68,6 +68,7 @@ public class MasterService {
                                 .ref_key(item.getTypeId())
                                 .ref_key2(item.getBreedId())
                                 .ref_key3(item.getUser().getPhone1())
+                                .ref_key4(item.getUser().getNickname())
                                 .value_th(item.getName())
                                 .value_en(item.getName())
                                 .build())

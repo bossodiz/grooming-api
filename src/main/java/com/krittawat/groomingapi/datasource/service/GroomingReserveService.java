@@ -25,4 +25,8 @@ public class GroomingReserveService {
         return groomingReserveRepository.save(eGroomingReserve);
     }
 
+    public void deleteById(Long id) {
+        groomingReserveRepository.deleteById(id);
+    }
+
 }

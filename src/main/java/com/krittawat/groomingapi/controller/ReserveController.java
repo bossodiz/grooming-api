@@ -22,4 +22,14 @@ public class ReserveController {
     public Response reserveGrooming(@RequestBody ReserveRequest request) throws DataNotFoundException {
         return reserveService.reserveGrooming(request);
     }
+
+    @PutMapping("/grooming")
+    public Response updateReserveGrooming(@RequestBody ReserveRequest request) throws DataNotFoundException {
+        return reserveService.updateReserveGrooming(request);
+    }
+
+    @DeleteMapping("/grooming/{id}")
+    public Response deleteReserveGrooming(@PathVariable Long id) {
+        return reserveService.deleteReserveGrooming(id);
+    }
 }
