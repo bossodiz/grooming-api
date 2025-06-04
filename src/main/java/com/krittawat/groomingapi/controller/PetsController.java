@@ -15,7 +15,7 @@ public class PetsController {
     private final PetsService petsService;
 
     @GetMapping("/list")
-    public Response getCustomers() throws DataNotFoundException {
+    public Response getCustomers() {
         return petsService.getPets();
     }
 

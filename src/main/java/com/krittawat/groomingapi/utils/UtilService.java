@@ -86,9 +86,9 @@ public class UtilService {
         return e.name();
     }
 
-    public static BigDecimal toBigDecimal(String weight) {
-        if (StringUtils.hasText(weight)) {
-            return new BigDecimal(weight);
+    public static BigDecimal toBigDecimal(String value) {
+        if (StringUtils.hasText(value)) {
+            return new BigDecimal(value);
         } else {
             return null;
         }

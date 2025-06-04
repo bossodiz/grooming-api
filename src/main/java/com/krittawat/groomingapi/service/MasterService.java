@@ -10,6 +10,7 @@ import com.krittawat.groomingapi.datasource.service.GroomingServiceService;
 import com.krittawat.groomingapi.datasource.service.PetBreedService;
 import com.krittawat.groomingapi.datasource.service.PetService;
 import com.krittawat.groomingapi.datasource.service.PetTypeService;
+import com.krittawat.groomingapi.error.DataNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -97,6 +98,19 @@ public class MasterService {
                                 .value_en(item.getNameEn())
                                 .build())
                         .toList())
+                .build();
+    }
+
+    public Response getPetTypeByName(String name) throws DataNotFoundException {
+        EPetType petType = petTypeService.getByName(name);
+        return Response.builder()
+                .code(200)
+                .message("Pet type found")
+                .data(DropdownResponse.builder()
+                        .key(petType.getId())
+                        .value_th(petType.getNameTh())
+                        .value_en(petType.getNameEn())
+                        .build())
                 .build();
     }
 }
