@@ -28,6 +28,7 @@ public class MemberService {
 
     @Transactional
     public Response register(RegisterRequest request) throws DataNotFoundException {
+        String a = "";
         if (userService.existsByUsername(request.getUsername().trim())) {
             EUser user = userService.findByUsername(request.getUsername().trim());
             return Response.builder()

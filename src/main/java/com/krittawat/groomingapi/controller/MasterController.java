@@ -35,4 +35,8 @@ public class MasterController {
         return masterService.getGroomingList(petTypeId);
     }
 
+    @GetMapping("/pet-type")
+    public Response getPetTypeByName(@RequestParam(name = "name") String name) throws DataNotFoundException {
+        return masterService.getPetTypeByName(name);
+    }
 }
