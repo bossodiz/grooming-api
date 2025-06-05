@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.krittawat</groupId>
 	<artifactId>grooming-api</artifactId>
-	<version>0.0.1</version>
+	<version>1.0</version>
 	<name>grooming-api</name>
 	<description>grooming-api</description>
 
