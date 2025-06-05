@@ -2,9 +2,9 @@ spring:
   jackson:
     time-zone: Asia/Bangkok
   datasource:
-    url: jdbc:mysql://mydb.cr8guweee4v5.ap-southeast-2.rds.amazonaws.com:3306/grooming
-    username: admin
-    password: admin1234
+    url: jdbc:mysql://root:PvDhNGQhBHMdbSDGOuUfUiTQjMFLQPOX@shuttle.proxy.rlwy.net:22978/railway
+    username: root
+    password: PvDhNGQhBHMdbSDGOuUfUiTQjMFLQPOX
     driver-class-name: com.mysql.jdbc.Driver
     hikari:
       maximum-pool-size: 10

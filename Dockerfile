@@ -1,3 +1,11 @@
+# ใช้ JDK 21
 FROM eclipse-temurin:21-jdk-alpine
-COPY target/grooming-api-*.jar app.jar
-ENTRYPOINT ["java","-jar","/app.jar"]
+
+# ตั้ง working directory
+WORKDIR /app
+
+# copy jar จาก target (คุณต้อง build มาก่อน)
+COPY target/*.jar app.jar
+
+# ให้ Spring Boot ใช้ profile=prod และอ่านพอร์ตจาก Railway
+ENTRYPOINT ["java", "-jar", "app.jar", "--spring.profiles.active=prod", "--server.port=${PORT}"]
