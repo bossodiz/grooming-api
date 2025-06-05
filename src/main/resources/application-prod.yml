@@ -5,7 +5,7 @@ spring:
     url: jdbc:mysql://root:PvDhNGQhBHMdbSDGOuUfUiTQjMFLQPOX@shuttle.proxy.rlwy.net:22978/railway
     username: root
     password: PvDhNGQhBHMdbSDGOuUfUiTQjMFLQPOX
-    driver-class-name: com.mysql.jdbc.Driver
+    driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       maximum-pool-size: 10
     jpa:
