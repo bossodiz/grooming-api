@@ -1,8 +1,10 @@
 spring:
+  jackson:
+    time-zone: Asia/Bangkok
   datasource:
-    url: jdbc:mysql://localhost:3306/prod
+    url: jdbc:mysql://mydb.cr8guweee4v5.ap-southeast-2.rds.amazonaws.com:3306/grooming
     username: admin
-    password: 1234
+    password: admin1234
     driver-class-name: com.mysql.jdbc.Driver
     hikari:
       maximum-pool-size: 10
@@ -11,5 +13,5 @@ spring:
         ddl-auto: update
       show-sql: false
 jwt:
-  secret-key: bossodiz
+  secret-key: NkQyYzNsbmQxNTJhZTJwZ2p2ZGZ5bjRkdmkwb0x6W0xFSF5Gb+OXy7hOjz7hGjmI==
   expiration: 86400000 # 1 วัน (มิลลิวินาที)

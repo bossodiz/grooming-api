@@ -5,7 +5,7 @@ import com.krittawat.groomingapi.error.TokenExpiredException;
 import com.krittawat.groomingapi.error.UnauthorizedException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Service;
 
@@ -16,8 +16,7 @@ import java.util.Date;
 public class JwtUtilService {
 
     private SecretKey getSigningKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(SecurityConstants.SECRET_KEY);
-        return Keys.hmacShaKeyFor(keyBytes);
+        return Keys.secretKeyFor(SignatureAlgorithm.HS256);
     }
 
     public String generateToken(String username) {
