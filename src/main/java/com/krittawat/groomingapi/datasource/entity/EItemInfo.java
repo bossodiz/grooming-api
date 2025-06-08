@@ -5,10 +5,12 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @Entity
-@Table(name = "item_info", schema = "dev")
+@Table(name = "item_info")
 public class EItemInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,5 +40,9 @@ public class EItemInfo {
     @Size(max = 100)
     @Column(name = "barcode", length = 100)
     private String barcode;
+
+    @OneToMany
+    @JoinColumn(name = "item_info_id", referencedColumnName = "id")
+    private List<EItemInfoTag> tags;
 
 }

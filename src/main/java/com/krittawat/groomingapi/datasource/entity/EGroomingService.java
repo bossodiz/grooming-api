@@ -1,19 +1,13 @@
 package com.krittawat.groomingapi.datasource.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Entity
 @Getter
@@ -39,4 +33,7 @@ public class EGroomingService implements java.io.Serializable, LocalizedName {
     private String remark;
     @Column(name = "sequence")
     private Integer sequence;
+    @OneToMany
+    @JoinColumn(name = "grooming_service_id", referencedColumnName = "id")
+    private List<EGroomingServiceTag> tags;
 }

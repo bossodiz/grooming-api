@@ -9,16 +9,16 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "item_tag", schema = "dev")
-public class EItemTag {
+@Table(name = "item_info_tag")
+public class EItemInfoTag {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @NotNull
-    @Column(name = "item_info_id", nullable = false)
-    private Long itemInfoId;
+    @ManyToOne
+    @JoinColumn(name = "item_info_id", referencedColumnName = "id")
+    private EItemInfo eItemInfo;
 
     @Size(max = 100)
     @NotNull
