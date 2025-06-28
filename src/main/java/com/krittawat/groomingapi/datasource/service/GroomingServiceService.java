@@ -4,6 +4,7 @@ import com.krittawat.groomingapi.datasource.entity.EGroomingService;
 import com.krittawat.groomingapi.datasource.entity.EPetType;
 import com.krittawat.groomingapi.datasource.repository.GroomingServiceRepository;
 import com.krittawat.groomingapi.datasource.repository.PetTypeRepository;
+import com.krittawat.groomingapi.datasource.repository.TagItemRepository;
 import com.krittawat.groomingapi.error.DataNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,10 @@ public class GroomingServiceService {
 
     public List<EGroomingService> getAllGroomingServices() {
         return groomingServiceRepository.findAll();
+    }
+
+    public List<EGroomingService> getGroomingServicesByPetType(Long petTypeId) {
+        return groomingServiceRepository.findAllByPetTypeId(petTypeId);
     }
 
     public List<EGroomingService> getGroomingServiceByPetTypeId(Long petTypeId) {
@@ -66,4 +71,5 @@ public class GroomingServiceService {
         }
         groomingServiceRepository.deleteById(id);
     }
+
 }

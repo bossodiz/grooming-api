@@ -6,6 +6,7 @@ import org.springframework.util.StringUtils;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
+import java.time.LocalDateTime;
 import java.util.function.Supplier;
 
 import static com.krittawat.groomingapi.utils.Constants.DASH;
@@ -17,7 +18,8 @@ public class UtilService {
 
     public static String toString(Integer value) {
         if (value == null) return null;
-        return String.valueOf(value);
+        DecimalFormat df = new DecimalFormat("#,##0.00");
+        return df.format(value);
     }
 
     public static String toString(BigDecimal value) {
@@ -92,5 +94,10 @@ public class UtilService {
         } else {
             return null;
         }
+    }
+
+    public static String toString(LocalDateTime value) {
+        if (value == null) return null;
+        return value.toString();
     }
 }

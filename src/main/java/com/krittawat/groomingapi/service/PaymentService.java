@@ -1,23 +1,30 @@
 package com.krittawat.groomingapi.service;
 
-import com.krittawat.groomingapi.controller.response.PaymentCustomersResponse;
-import com.krittawat.groomingapi.controller.response.PetResponse;
-import com.krittawat.groomingapi.controller.response.Response;
+import com.krittawat.groomingapi.controller.request.CalculatePaymentRequest;
+import com.krittawat.groomingapi.controller.response.*;
+import com.krittawat.groomingapi.datasource.entity.EGroomingService;
+import com.krittawat.groomingapi.datasource.entity.EProduct;
+import com.krittawat.groomingapi.datasource.entity.ETagItem;
+import com.krittawat.groomingapi.datasource.service.GroomingServiceService;
+import com.krittawat.groomingapi.datasource.service.ProductService;
+import com.krittawat.groomingapi.datasource.service.TagService;
 import com.krittawat.groomingapi.datasource.service.UserService;
 import com.krittawat.groomingapi.error.DataNotFoundException;
+import com.krittawat.groomingapi.utils.EnumUtil;
+import com.krittawat.groomingapi.utils.UtilService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class PaymentService {
 
-    private final UserService userService; // Assuming you have a CustomerRepository to fetch customer data
+    private final UserService userService;
+    private final GroomingServiceService groomingServiceService;
+    private final ProductService productService;
+    private final TagService tagService;
 
     public Response getCustomers() throws DataNotFoundException {
         List<PaymentCustomersResponse> customerResponseList = new ArrayList<>(userService.findByCustomers().stream()
@@ -33,21 +40,10 @@ public class PaymentService {
                     if (!nickname.isEmpty()) nameParts.add(nickname);
                     String label = String.format("(%s)%s%s", phoneMask, nameParts.isEmpty() ? "" : " ", String.join(" - ", nameParts));
                     String name = String.format("%s%s", nameParts.isEmpty() ? "" : " ", String.join(" - ", nameParts));
-
-                    List<PetResponse> pets = e.getPets().stream()
-                            .map(pet -> PetResponse.builder()
-                                    .id(pet.getId())
-                                    .name(Optional.ofNullable(pet.getName()).orElse(""))
-                                    .typeNameTh(Optional.ofNullable(pet.getPetType().getNameTh()).orElse(""))
-                                    .typeNameEn(Optional.ofNullable(pet.getPetType().getNameEn()).orElse(""))
-                                    .build())
-                            .sorted(Comparator.comparing(PetResponse::getName, Comparator.nullsLast(String::compareToIgnoreCase)))
-                            .toList();
                     return PaymentCustomersResponse.builder()
                             .key(e.getId())
                             .label(label)
                             .name(name)
-                            .pets(pets)
                             .build();
                 })
                 .sorted(Comparator.comparing(PaymentCustomersResponse::getName, Comparator.nullsLast(String::compareToIgnoreCase)))
@@ -56,7 +52,6 @@ public class PaymentService {
                 .key(null)
                 .label("ไม่ระบุ")
                 .name("No name")
-                .pets(new ArrayList<>())
                 .build()); // Add a default option for selection
         return Response.builder()
                 .code(200)
@@ -65,17 +60,18 @@ public class PaymentService {
     }
 
     public Response getPetsByCustomerId(Long customerId) throws DataNotFoundException {
-        List<PaymentCustomersResponse> petResponseList = userService.findByCustomersId(customerId).getPets().stream()
+        List<PaymentPetResponse> petResponseList = userService.findByCustomersId(customerId).getPets().stream()
                 .map(pet -> {
                     String name = Optional.ofNullable(pet.getName()).orElse("");
-                    String type = Optional.ofNullable(pet.getPetType().getName()).orElse("");
                     String typeTh = Optional.ofNullable(pet.getPetType().getNameTh()).orElse("");
-                    return PaymentCustomersResponse.builder()
+                    return PaymentPetResponse.builder()
                             .key(pet.getId())
                             .label(String.format("%s - %s", typeTh, name))
+                            .name(name)
+                            .petTypeId(pet.getTypeId())
                             .build();
                 })
-                .sorted(Comparator.comparing(PaymentCustomersResponse::getName, Comparator.nullsLast(String::compareToIgnoreCase)))
+                .sorted(Comparator.comparing(PaymentPetResponse::getName, Comparator.nullsLast(String::compareToIgnoreCase)))
                 .toList();
         return Response.builder()
                 .code(200)
@@ -83,12 +79,63 @@ public class PaymentService {
                 .build();
     }
 
-    public Response getTagsByTagType(String tagType) {
-    // This method is not implemented in the original code, so we will return an empty response.
-        // You can implement the logic to fetch tags based on the tagType if needed.
+
+    public Response getGroomingServices(Long petTypeId) {
+        List<EGroomingService> list = groomingServiceService.getGroomingServicesByPetType(petTypeId).stream()
+                .sorted(Comparator.comparing((EGroomingService e) -> e.getPetType().getId())
+                        .thenComparing(EGroomingService::getSequence))
+                .toList();
+        List<ETagItem> tagItems = tagService.getTagItemsByTagType(EnumUtil.TAG_TYPE.GROOMING);
+        List<GroomingServiceResponse> response = list.stream()
+                .map(service -> GroomingServiceResponse.builder()
+                        .id(service.getId())
+                        .nameTh(service.getNameTh())
+                        .nameEn(service.getNameEn())
+                        .description(service.getRemark())
+                        .typeId(service.getPetType().getId())
+                        .price(UtilService.toStringDefaulterZero(service.getPrice()))
+                        .tags(tagItems.stream().filter(
+                                tagItem -> Objects.equals(tagItem.getItemId(), service.getId()))
+                                .map(tag -> ItemTagResponse.builder()
+                                        .id(tag.getTag().getId())
+                                        .name(tag.getTag().getName())
+                                        .build())
+                                .toList())
+                        .build())
+                .toList();
         return Response.builder()
                 .code(200)
-                .data(new ArrayList<>())
+                .data(response)
                 .build();
+    }
+
+    public Response getPetShopProduct() {
+        List<EProduct> list = productService.getProducts();
+        List<ETagItem> tagItems = tagService.getTagItemsByTagType(EnumUtil.TAG_TYPE.PET_SHOP);
+        List<PetShotResponse> responses = list.stream()
+                .map(item -> PetShotResponse.builder()
+                    .id(item.getId())
+                    .nameTh(item.getNameTh())
+                    .nameEn(item.getNameEn())
+                    .price(UtilService.toStringDefaulterZero(item.getPrice()))
+                    .description(item.getRemark())
+                    .stock(UtilService.toStringDefaulterZero(item.getStock()))
+                    .tags(tagItems.stream().filter(
+                            tagItem -> Objects.equals(tagItem.getItemId(), item.getId()))
+                                .map(tag -> ItemTagResponse.builder()
+                                        .id(tag.getTag().getId())
+                                        .name(tag.getTag().getName())
+                                        .build())
+                                .toList())
+                    .build())
+                .toList();
+        return Response.builder()
+                .code(200)
+                .data(responses)
+                .build();
+    }
+
+    public Response calculate(CalculatePaymentRequest request) {
+        return null;
     }
 }

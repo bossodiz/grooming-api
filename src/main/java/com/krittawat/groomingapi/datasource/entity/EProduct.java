@@ -9,6 +9,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -40,4 +41,7 @@ public class EProduct implements java.io.Serializable, LocalizedName {
     @CreationTimestamp
     @Column(name = "created_date")
     private LocalDateTime createdDate;
+    @OneToMany
+    @JoinColumn(name = "product_id", referencedColumnName = "id")
+    private List<EProductTag> tags;
 }

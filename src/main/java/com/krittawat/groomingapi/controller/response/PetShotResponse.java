@@ -9,15 +9,13 @@ import java.util.List;
 @Data
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class GroomingServiceResponse {
+public class PetShotResponse {
     private Long id;
     private String nameTh;
     private String nameEn;
-    private Long typeId;
-    private String typeTh;
-    private String typeEn;
-    private String price;
-    private String remark;
     private String description;
+    private String tag;
+    private String price;
+    private String stock;
     private List<ItemTagResponse> tags;
 }

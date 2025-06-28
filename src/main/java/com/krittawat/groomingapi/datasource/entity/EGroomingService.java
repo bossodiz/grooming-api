@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 @Entity
 @Getter
@@ -33,7 +32,4 @@ public class EGroomingService implements java.io.Serializable, LocalizedName {
     private String remark;
     @Column(name = "sequence")
     private Integer sequence;
-    @OneToMany
-    @JoinColumn(name = "grooming_service_id", referencedColumnName = "id")
-    private List<EGroomingServiceTag> tags;
 }

@@ -1,16 +1,12 @@
 package com.krittawat.groomingapi.service;
 
 import com.krittawat.groomingapi.controller.response.DropdownResponse;
+import com.krittawat.groomingapi.controller.response.ItemTagResponse;
 import com.krittawat.groomingapi.controller.response.Response;
-import com.krittawat.groomingapi.datasource.entity.EGroomingService;
-import com.krittawat.groomingapi.datasource.entity.EPet;
-import com.krittawat.groomingapi.datasource.entity.EPetBreed;
-import com.krittawat.groomingapi.datasource.entity.EPetType;
-import com.krittawat.groomingapi.datasource.service.GroomingServiceService;
-import com.krittawat.groomingapi.datasource.service.PetBreedService;
-import com.krittawat.groomingapi.datasource.service.PetService;
-import com.krittawat.groomingapi.datasource.service.PetTypeService;
+import com.krittawat.groomingapi.datasource.entity.*;
+import com.krittawat.groomingapi.datasource.service.*;
 import com.krittawat.groomingapi.error.DataNotFoundException;
+import com.krittawat.groomingapi.utils.EnumUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +21,8 @@ public class MasterService {
     private final PetBreedService petBreedService;
     private final PetService petService;
     private final GroomingServiceService groomingServiceService;
+    private final ProductService productService;
+    private final TagService tagService;
 
     public Response getPetType() {
         List<EPetType> list = petTypeService.getAll();
@@ -111,6 +109,20 @@ public class MasterService {
                         .value_th(petType.getNameTh())
                         .value_en(petType.getNameEn())
                         .build())
+                .build();
+    }
+
+    public Response getTagsByTagType(EnumUtil.TAG_TYPE tagType) {
+        List<ETag> itemTagList = tagService.getTagsByTagType(tagType);
+        List<ItemTagResponse> tagList = itemTagList.stream()
+                    .map(tag -> ItemTagResponse.builder()
+                            .id(tag.getId())
+                            .name(tag.getName())
+                            .build())
+                    .toList();
+        return Response.builder()
+                .code(200)
+                .data(tagList)
                 .build();
     }
 }

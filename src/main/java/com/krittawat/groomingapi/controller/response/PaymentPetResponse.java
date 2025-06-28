@@ -5,8 +5,9 @@ import lombok.Data;
 
 @Data
 @Builder
-public class PaymentCustomersResponse {
+public class PaymentPetResponse {
     private Long key;
     private String label;
     private String name;
+    private Long petTypeId;
 }

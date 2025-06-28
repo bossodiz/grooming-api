@@ -1,5 +1,6 @@
 package com.krittawat.groomingapi.controller;
 
+import com.krittawat.groomingapi.controller.request.CalculatePaymentRequest;
 import com.krittawat.groomingapi.controller.response.Response;
 import com.krittawat.groomingapi.error.DataNotFoundException;
 import com.krittawat.groomingapi.service.PaymentService;
@@ -23,8 +24,19 @@ public class PaymentContoller {
         return paymentService.getPetsByCustomerId(customerId);
     }
 
-    @GetMapping("/tags/{tagType}")
-    public Response getTagsByTagTypeId(@PathVariable(name="tagType") String tagType) throws DataNotFoundException {
-        return paymentService.getTagsByTagType(tagType);
+    @GetMapping("/grooming-services")
+    public Response getGroomingServices(@RequestParam (name = "petTypeId", required = true) Long petTypeId) throws DataNotFoundException {
+        return paymentService.getGroomingServices(petTypeId);
     }
+
+    @GetMapping("/pet-shop-services")
+    public Response getPetShopProduct()  {
+        return paymentService.getPetShopProduct();
+    }
+
+    @PostMapping("/calculate")
+    public Response calculate(@RequestBody CalculatePaymentRequest request) throws DataNotFoundException {
+        return paymentService.calculate(request);
+    }
+
 }
