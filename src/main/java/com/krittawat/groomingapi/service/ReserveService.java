@@ -20,7 +20,6 @@ import java.util.List;
 public class ReserveService {
 
     private final GroomingReserveService groomingReserveService;
-    private final GroomingServiceService groomingServiceService;
     private final PetService petService;
     private final PetTypeService petTypeService;
     private final PetBreedService petBreedService;
@@ -43,8 +42,6 @@ public class ReserveService {
                                         .phone(item.getPhone())
                                         .petType(item.getPetType() != null ? item.getPetType().getId() : null)
                                         .petBreed(item.getPetBreed() != null ? item.getPetBreed().getId() : null)
-                                        .serviceId(item.getGroomingService() != null ? item.getGroomingService().getId() : null)
-                                        .serviceName(item.getGroomingService() != null ? item.getGroomingService().getNameTh() : null)
                                         .note(item.getNote())
                                         .build())
                                 .build())
@@ -73,9 +70,6 @@ public class ReserveService {
         if (request.getBreed() != null){
             eGroomingReserve.setPetBreed(petBreedService.getById(request.getBreed()));
         }
-        if (request.getGrooming() != null){
-            eGroomingReserve.setGroomingService(groomingServiceService.getById(request.getGrooming()));
-        }
         eGroomingReserve.setPhone(request.getPhone());
         eGroomingReserve.setColor(request.getColor());
         eGroomingReserve.setNote(request.getNote());
@@ -97,8 +91,6 @@ public class ReserveService {
                                 .phone(eGroomingReserve.getPhone())
                                 .petType(eGroomingReserve.getPetType() != null ? eGroomingReserve.getPetType().getId() : null)
                                 .petBreed(eGroomingReserve.getPetBreed() != null ? eGroomingReserve.getPetBreed().getId() : null)
-                                .serviceId(eGroomingReserve.getGroomingService().getId())
-                                .serviceName(eGroomingReserve.getGroomingService().getNameTh())
                                 .note(eGroomingReserve.getNote())
                                 .build())
                         .build())
@@ -126,8 +118,6 @@ public class ReserveService {
                                 .phone(eGroomingReserve.getPhone())
                                 .petType(eGroomingReserve.getPetType() != null ? eGroomingReserve.getPetType().getId() : null)
                                 .petBreed(eGroomingReserve.getPetBreed() != null ? eGroomingReserve.getPetBreed().getId() : null)
-                                .serviceId(eGroomingReserve.getGroomingService().getId())
-                                .serviceName(eGroomingReserve.getGroomingService().getNameTh())
                                 .note(eGroomingReserve.getNote())
                                 .build())
                         .build())

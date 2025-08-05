@@ -30,7 +30,7 @@ public class EImage implements java.io.Serializable {
     private EPet pet;
     @ManyToOne
     @JoinColumn(name = "product_id", referencedColumnName = "id")
-    private EProduct product;
+    private EItem product;
     @ManyToOne
     @JoinColumn(name = "promotion_id", referencedColumnName = "id")
     private EPromotion promotion;

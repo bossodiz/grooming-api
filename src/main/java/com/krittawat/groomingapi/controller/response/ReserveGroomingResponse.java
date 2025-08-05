@@ -22,8 +22,6 @@ public class ReserveGroomingResponse {
         private String phone;
         private Long petType;
         private Long petBreed;
-        private Long serviceId;
-        private String serviceName;
         private String note;
     }
 }

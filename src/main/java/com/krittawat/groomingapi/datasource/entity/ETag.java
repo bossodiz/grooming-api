@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -20,7 +20,6 @@ public class ETag {
     private Long id;
     @JoinColumn(name = "name")
     private String name;
-    @OneToMany
-    @JoinColumn(name = "item_id", referencedColumnName = "id")
-    private List<ETagItem> items;
+    @ManyToMany(mappedBy = "tags")
+    private Set<EItem> items;
 }

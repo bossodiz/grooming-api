@@ -5,20 +5,24 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "promotion")
-public class EPromotionExcludedItem {
+@Table(name = "promotion_included_item")
+public class EPromotionIncludedItem {
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "name")
+    @Column(name = "promotion_id")
     private Long promotionId;
-    @Column(name = "name")
+    @Column(name = "item_id")
     private Long itemId;
+    @CreationTimestamp
+    @Column(name = "created_at")
+    private String createdAt;
 }

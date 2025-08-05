@@ -39,15 +39,6 @@ public class EnumUtil {
 
     @Getter
     @AllArgsConstructor
-    public enum ORDER_TYPE {
-        GROOMING("กรูมมิ่ง", "Grooming"),
-        PRODUCT("สินค้า", "Product");
-        private final String nameTh;
-        private final String nameEn;
-    }
-
-    @Getter
-    @AllArgsConstructor
     public enum PROMOTION_TYPE {
         GROOMING("กรูมมิ่ง", "Grooming"),
         PET_SHOP("สินค้า", "Pet Shop"),
@@ -60,7 +51,8 @@ public class EnumUtil {
     @AllArgsConstructor
     public enum AMOUNT_TYPE {
         BAHT("บาท", "Baht"),
-        PERCENT("%", "Percent");
+        PERCENT("%", "Percent"),
+        EACH("ชิ้น", "Each");
         private final String nameTh;
         private final String nameEn;
     }
@@ -84,7 +76,7 @@ public class EnumUtil {
 
     @Getter
     @AllArgsConstructor
-    public enum TAG_TYPE {
+    public enum ITEM_TYPE {
         GROOMING("GROOMING"),
         PET_SHOP("PET_SHOP");
         private final String name;
@@ -123,4 +115,16 @@ public class EnumUtil {
         private final String nameTh;
         private final String nameEn;
     }
+
+    @Getter
+    @AllArgsConstructor
+    public enum ITEM_CATEGORY {
+        CAT("แมว"),
+        DOG("สุนัข"),
+        TOY("ของเล่น"),
+        FOOD("อาหาร");
+        private final String name;
+    }
+
+
 }

@@ -11,13 +11,12 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class GroomingServiceResponse {
     private Long id;
-    private String nameTh;
-    private String nameEn;
-    private Long typeId;
-    private String typeTh;
-    private String typeEn;
+    private String name;
     private String price;
     private String remark;
+    private Long type;
+    private String typeName;
     private String description;
+    private String barcode;
     private List<ItemTagResponse> tags;
 }

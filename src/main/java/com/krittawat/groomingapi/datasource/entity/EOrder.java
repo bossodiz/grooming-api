@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "order")
-public class EOrder implements java.io.Serializable {
+public class EOrder {
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,17 +26,12 @@ public class EOrder implements java.io.Serializable {
     @ManyToOne
     @JoinColumn(name = "customer_id", referencedColumnName = "id")
     private EUser customer;
-    @Column(name = "order_type")
-    private String orderType;
-    @ManyToOne
-    @JoinColumn(name = "grooming_service_id", referencedColumnName = "id")
-    private EGroomingService groomingService;
     @ManyToOne
     @JoinColumn(name = "pet_id", referencedColumnName = "id")
     private EPet pet;
     @ManyToOne
-    @JoinColumn(name = "product_id", referencedColumnName = "id")
-    private EProduct product;
+    @JoinColumn(name = "item_id", referencedColumnName = "id")
+    private EItem item;
     @ManyToOne
     @JoinColumn(name = "promotion_id", referencedColumnName = "id")
     private EPromotion promotion;

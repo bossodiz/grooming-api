@@ -11,9 +11,8 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PetShotResponse {
     private Long id;
-    private String nameTh;
-    private String nameEn;
-    private String description;
+    private String name;
+    private String remark;
     private String tag;
     private String price;
     private String stock;

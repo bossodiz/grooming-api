@@ -1,11 +1,13 @@
 package com.krittawat.groomingapi.datasource.entity;
 
+import com.krittawat.groomingapi.utils.EnumUtil;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -16,32 +18,46 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "promotion")
-public class EPromotion implements java.io.Serializable, LocalizedName {
+public class EPromotion {
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "name_th")
-    private String nameTh;
-    @Column(name = "name_en")
-    private String nameEn;
-    @Column(name = "promotion_type")
-    private String promotionType;
-    @ManyToOne
-    @JoinColumn(name = "grooming_service_id", referencedColumnName = "id")
-    private EGroomingService groomingService;
-    @ManyToOne
-    @JoinColumn(name = "product_id", referencedColumnName = "id")
-    private EProduct product;
-    @Column(name = "start_date")
-    private LocalDateTime startDate;
-    @Column(name = "expire_date")
-    private LocalDateTime expireDate;
+    @Column(name = "name")
+    private String name;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "discount_category")
+    private EnumUtil.PROMOTION_TYPE discountCategory;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "discount_type")
+    private EnumUtil.DISCOUNT_TYPE discountType;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "amount_type")
+    private EnumUtil.AMOUNT_TYPE amountType;
     @Column(name = "amount")
     private BigDecimal amount;
-    @Column(name = "amount_type")
-    private String amountType;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "period_type")
+    private EnumUtil.PERIOD_TYPE periodType;
+    @Column(name = "start_date")
+    private LocalDateTime startDate;
+    @Column(name = "end_date")
+    private LocalDateTime endDate;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "specific_days")
+    private EnumUtil.SPECIFIC_DAY specificDays;
+    @Column(name = "customer_only")
+    private Boolean customerOnly;
+    @Column(name = "status")
+    private Boolean status;
+    @Column(name = "quota")
+    private Integer quota;
+    @Column(name = "condition")
+    private String condition;
     @CreationTimestamp
-    @Column(name = "created_date")
-    private LocalDateTime createdDate;
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 }

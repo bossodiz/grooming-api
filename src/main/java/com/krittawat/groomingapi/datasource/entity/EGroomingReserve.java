@@ -36,9 +36,6 @@ public class EGroomingReserve implements java.io.Serializable {
     private LocalDateTime reserveDateStart;
     @Column(name = "reserve_date_end")
     private LocalDateTime reserveDateEnd;
-    @ManyToOne
-    @JoinColumn(name = "grooming_service_id", referencedColumnName = "id")
-    private EGroomingService groomingService;
     @CreationTimestamp
     @Column(name = "created_date")
     private String createdDate;

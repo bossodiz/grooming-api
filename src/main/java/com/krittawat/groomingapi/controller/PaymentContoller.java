@@ -1,11 +1,13 @@
 package com.krittawat.groomingapi.controller;
 
-import com.krittawat.groomingapi.controller.request.CalculatePaymentRequest;
+import com.krittawat.groomingapi.controller.request.CartItemRequest;
 import com.krittawat.groomingapi.controller.response.Response;
 import com.krittawat.groomingapi.error.DataNotFoundException;
 import com.krittawat.groomingapi.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/payment")
@@ -31,11 +33,11 @@ public class PaymentContoller {
 
     @GetMapping("/pet-shop-services")
     public Response getPetShopProduct()  {
-        return paymentService.getPetShopProduct();
+            return paymentService.getPetShopProduct();
     }
 
     @PostMapping("/calculate")
-    public Response calculate(@RequestBody CalculatePaymentRequest request) throws DataNotFoundException {
+    public Response calculate(@RequestBody List<CartItemRequest> request) throws DataNotFoundException {
         return paymentService.calculate(request);
     }
 
