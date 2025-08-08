@@ -9,4 +9,5 @@ public class PaymentCustomersResponse {
     private Long key;
     private String label;
     private String name;
+    private String phone;
 }

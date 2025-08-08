@@ -1,13 +1,12 @@
 package com.krittawat.groomingapi.controller;
 
-import com.krittawat.groomingapi.controller.request.CartItemRequest;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.krittawat.groomingapi.controller.request.CalculateRequest;
 import com.krittawat.groomingapi.controller.response.Response;
 import com.krittawat.groomingapi.error.DataNotFoundException;
 import com.krittawat.groomingapi.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/payment")
@@ -37,8 +36,11 @@ public class PaymentContoller {
     }
 
     @PostMapping("/calculate")
-    public Response calculate(@RequestBody List<CartItemRequest> request) throws DataNotFoundException {
-        return paymentService.calculate(request);
+    public Response calculate(
+            @RequestParam(defaultValue = "preview") String mode,
+            @RequestBody CalculateRequest request
+    ) throws DataNotFoundException, JsonProcessingException {
+        return paymentService.calculate(request, mode);
     }
 
 }

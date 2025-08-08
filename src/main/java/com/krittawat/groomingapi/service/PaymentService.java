@@ -1,14 +1,16 @@
 package com.krittawat.groomingapi.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.hash.Hashing;
+import com.krittawat.groomingapi.controller.request.CalculateRequest;
 import com.krittawat.groomingapi.controller.request.CartItemRequest;
 import com.krittawat.groomingapi.controller.response.*;
+import com.krittawat.groomingapi.datasource.entity.ECalculationSession;
 import com.krittawat.groomingapi.datasource.entity.EItem;
 import com.krittawat.groomingapi.datasource.entity.EPromotion;
 import com.krittawat.groomingapi.datasource.entity.EPromotionFreeGiftItem;
-import com.krittawat.groomingapi.datasource.service.ItemsService;
-import com.krittawat.groomingapi.datasource.service.PromotionService;
-import com.krittawat.groomingapi.datasource.service.TagService;
-import com.krittawat.groomingapi.datasource.service.UserService;
+import com.krittawat.groomingapi.datasource.service.*;
 import com.krittawat.groomingapi.error.DataNotFoundException;
 import com.krittawat.groomingapi.service.model.DiscountResult;
 import com.krittawat.groomingapi.utils.EnumUtil;
@@ -17,10 +19,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,6 +33,9 @@ public class PaymentService {
     private final TagService tagService;
     private final PromotionService promotionService;
     private final ItemsService itemsService;
+    private final CalculationSessionService calculationSessionService;
+
+    private static final int PREVIEW_EXPIRES_SEC = 60;
 
     public Response getCustomers() throws DataNotFoundException {
         List<PaymentCustomersResponse> customerResponseList = new ArrayList<>(userService.findByCustomers().stream()
@@ -50,6 +55,7 @@ public class PaymentService {
                             .key(e.getId())
                             .label(label)
                             .name(name)
+                            .phone(phone)
                             .build();
                 })
                 .sorted(Comparator.comparing(PaymentCustomersResponse::getName, Comparator.nullsLast(String::compareToIgnoreCase)))
@@ -58,6 +64,7 @@ public class PaymentService {
                 .key(null)
                 .label("ไม่ระบุ")
                 .name("No name")
+                .phone("")
                 .build()); // Add a default option for selection
         return Response.builder()
                 .code(200)
@@ -136,7 +143,9 @@ public class PaymentService {
     }
 
 
-    public Response calculate(List<CartItemRequest> cartItems) throws DataNotFoundException {
+    public Response calculate(CalculateRequest request, String mode) throws DataNotFoundException, JsonProcessingException {
+        List<CartItemRequest> cartItems = request.getItems();
+        boolean isFinalize = "finalize".equalsIgnoreCase(mode);
         List<EPromotion> allPromotions  = promotionService.findByActive();
         List<FreeGiftResponse> allFreeGifts = promotionService.getAllFreeGifts();
 
@@ -270,6 +279,7 @@ public class PaymentService {
                                 .promotionId(promo.getId())
                                 .name(promo.getName())
                                 .discountAmount(discountAmount)
+                                .usedUnits(actualFreeCount)
                                 .build());
                     }
                 }
@@ -335,18 +345,72 @@ public class PaymentService {
                     .discountAmount(moreThanDiscount)
                     .build();
         }
+        String cartHash = Hashing.sha256()
+                .hashString(new ObjectMapper().writeValueAsString(cartItems), StandardCharsets.UTF_8)
+                .toString();
 
-        return Response.builder()
-                .code(200)
-                .data(CartCalculationResultResponse.builder()
-                    .items(itemResponses)
-                    .totalBeforeDiscount(totalBeforeDiscount)
-                    .totalDiscount(totalDiscount.add(moreThanDiscount))
-                    .totalAfterDiscount(totalAfterDiscount.subtract(moreThanDiscount))
-                    .warningPromotions(warningPromotions)
-                    .overallPromotion(overall)
-                    .build())
+        CartCalculationResultResponse result = CartCalculationResultResponse.builder()
+                .items(itemResponses)
+                .totalBeforeDiscount(totalBeforeDiscount)
+                .totalDiscount(totalDiscount)
+                .totalAfterDiscount(totalAfterDiscount)
+                .warningPromotions(warningPromotions)
+                .overallPromotion(overall)
                 .build();
+        String calculationId = request.getCalculationId();
+        if (!isFinalize) {
+            // ===== PREVIEW =====
+            String calcId = (calculationId != null && !calculationId.isBlank())
+                    ? calculationId
+                    : UUID.randomUUID().toString();
+
+            ECalculationSession session = calculationSessionService.getOrNewByCalculationId(calcId);
+            session.setCalculationId(calcId);
+            session.setCartHash(cartHash);
+            session.setPayloadJson(new ObjectMapper().writeValueAsString(result));
+            session.setTotalBefore(totalBeforeDiscount);
+            session.setTotalDiscount(totalDiscount);
+            session.setTotalAfter(totalAfterDiscount);
+            session.setStatus("PREVIEW");
+            session.setExpiresAt(LocalDateTime.now().plusSeconds(PREVIEW_EXPIRES_SEC));
+            calculationSessionService.save(session);
+            result.setCalculationId(calcId);
+            result.setExpiresInSec(PREVIEW_EXPIRES_SEC);
+            return Response.builder().code(200).data(result).build();
+        } else {
+            // ===== FINALIZE =====
+            if (calculationId == null || calculationId.isBlank()) {
+                throw new IllegalArgumentException("calculationId is required for finalize");
+            }
+            ECalculationSession session = calculationSessionService.getByCalculationId(calculationId);
+            if (!"PREVIEW".equals(session.getStatus())) {
+                throw new IllegalStateException("Session already finalized or expired");
+            }
+            if (session.getExpiresAt().isBefore(LocalDateTime.now())) {
+                // session หมดอายุ
+                session.setStatus("EXPIRED");
+                calculationSessionService.save(session);
+                throw new IllegalStateException("Preview session expired, please recalculate");
+            }
+            if (!Objects.equals(session.getCartHash(), cartHash)) {
+                throw new IllegalStateException("Cart changed since preview, please recalculate");
+            }
+
+            // อ่าน previewResult: ถ้าคุณ "ตรึงผล" ตาม preview ให้ parse จาก session.payloadJson
+            CartCalculationResultResponse previewResult =
+                    new ObjectMapper().readValue(session.getPayloadJson(), CartCalculationResultResponse.class);
+            // หักโควตา (ตามจำนวนชิ้นของแถมจริง)
+            promotionService.consumePromotionQuotas(previewResult);
+
+            session.setStatus("FINALIZED");
+            session.setFinalizedAt(LocalDateTime.now());
+            calculationSessionService.save(session);
+
+            // แนบค่าเดิมกลับ (หรือจะดึงจาก session.payloadJson ก็ได้ถ้าอยาก "ตรึง" ตาม preview เด๊ะๆ)
+            result.setCalculationId(calculationId);
+            result.setExpiresInSec(0);
+            return Response.builder().code(200).data(result).build();
+        }
     }
 
     private List<EPromotion> filterPromotionsForItem(List<EPromotion> allPromotions, EItem item) {
@@ -478,16 +542,6 @@ public class PaymentService {
         return new DiscountResult(BigDecimal.ZERO, missingFreeGifts);
     }
 
-    private BigDecimal extractThreshold(String condition) {
-        if (condition == null) return BigDecimal.ZERO;
-        Pattern pattern = Pattern.compile("AMOUNT>(\\d+(\\.\\d+)?)");
-        Matcher matcher = pattern.matcher(condition);
-        if (matcher.find()) {
-            return new BigDecimal(matcher.group(1));
-        }
-        return BigDecimal.ZERO;
-    }
-
     private int extractRequiredQuantity(String condition) {
         if (condition != null && condition.startsWith("BUY_")) {
             try {
@@ -512,4 +566,7 @@ public class PaymentService {
         }
         return BigDecimal.ZERO;
     }
+
+
+
 }
