@@ -2,9 +2,11 @@ package com.krittawat.groomingapi.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.krittawat.groomingapi.controller.request.CalculateRequest;
+import com.krittawat.groomingapi.controller.request.GenerateQrRequest;
 import com.krittawat.groomingapi.controller.response.Response;
 import com.krittawat.groomingapi.error.DataNotFoundException;
 import com.krittawat.groomingapi.service.PaymentService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,10 +39,15 @@ public class PaymentContoller {
 
     @PostMapping("/calculate")
     public Response calculate(
-            @RequestParam(defaultValue = "preview") String mode,
             @RequestBody CalculateRequest request
     ) throws DataNotFoundException, JsonProcessingException {
-        return paymentService.calculate(request, mode);
+        return paymentService.calculate(request);
     }
+
+    @PostMapping("/generate-qr")
+    public Response generateQr(@Valid @RequestBody GenerateQrRequest request) throws Exception {
+        return paymentService.generateQrCode(request);
+    }
+
 
 }

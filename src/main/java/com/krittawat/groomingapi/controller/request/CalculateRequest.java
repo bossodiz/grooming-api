@@ -7,5 +7,5 @@ import java.util.List;
 @Data
 public class CalculateRequest {
     private List<CartItemRequest> items;
-    private String calculationId;
+    private String invoiceNo;
 }

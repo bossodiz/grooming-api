@@ -21,6 +21,5 @@ public class CartCalculationResultResponse {
     private BigDecimal totalAfterDiscount;
     private List<String> warningPromotions;
     private AppliedPromotionResponse overallPromotion;
-    private String calculationId;
-    private Integer expiresInSec;
+    private String invoiceNo;
 }

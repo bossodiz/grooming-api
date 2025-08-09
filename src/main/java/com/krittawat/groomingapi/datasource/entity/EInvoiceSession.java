@@ -9,16 +9,16 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "calculation_session")
+@Table(name = "invoice_session")
 @Getter
 @Setter
-public class ECalculationSession {
+public class EInvoiceSession {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name="calculation_id", unique = true)
-    private String calculationId;
+    @Column(name="invoice_no", unique = true)
+    private String invoiceNo;
 
     @Column(name="cart_hash")
     private String cartHash;
@@ -38,14 +38,9 @@ public class ECalculationSession {
     @Column(name="status")
     private String status; // PREVIEW / FINALIZED / EXPIRED
 
-    @Column(name="expires_at")
-    private LocalDateTime expiresAt;
-
     @CreationTimestamp
     @Column(name="created_at")
     private LocalDateTime createdAt;
 
-    @Column(name="finalized_at")
-    private LocalDateTime finalizedAt;
 }
 

@@ -2,25 +2,33 @@ package com.krittawat.groomingapi.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.hash.Hashing;
+import com.krittawat.groomingapi.config.PromptPayProperties;
 import com.krittawat.groomingapi.controller.request.CalculateRequest;
 import com.krittawat.groomingapi.controller.request.CartItemRequest;
+import com.krittawat.groomingapi.controller.request.GenerateQrRequest;
 import com.krittawat.groomingapi.controller.response.*;
-import com.krittawat.groomingapi.datasource.entity.ECalculationSession;
+import com.krittawat.groomingapi.datasource.entity.EInvoiceSession;
 import com.krittawat.groomingapi.datasource.entity.EItem;
 import com.krittawat.groomingapi.datasource.entity.EPromotion;
 import com.krittawat.groomingapi.datasource.entity.EPromotionFreeGiftItem;
-import com.krittawat.groomingapi.datasource.service.*;
+import com.krittawat.groomingapi.datasource.service.CalculationSessionService;
+import com.krittawat.groomingapi.datasource.service.ItemsService;
+import com.krittawat.groomingapi.datasource.service.PromotionService;
+import com.krittawat.groomingapi.datasource.service.UserService;
 import com.krittawat.groomingapi.error.DataNotFoundException;
+import com.krittawat.groomingapi.service.model.CoreCalc;
 import com.krittawat.groomingapi.service.model.DiscountResult;
+import com.krittawat.groomingapi.service.model.MoreThanPick;
 import com.krittawat.groomingapi.utils.EnumUtil;
+import com.krittawat.groomingapi.utils.PromptPayUtil;
 import com.krittawat.groomingapi.utils.UtilService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -30,12 +38,14 @@ import java.util.stream.Collectors;
 public class PaymentService {
 
     private final UserService userService;
-    private final TagService tagService;
     private final PromotionService promotionService;
     private final ItemsService itemsService;
     private final CalculationSessionService calculationSessionService;
+    private final ObjectMapper objectMapper;
+    private final QrService qrService;
+    private final PromptPayProperties props;
 
-    private static final int PREVIEW_EXPIRES_SEC = 60;
+    private static final int PREVIEW_EXPIRES_SEC = 5;
 
     public Response getCustomers() throws DataNotFoundException {
         List<PaymentCustomersResponse> customerResponseList = new ArrayList<>(userService.findByCustomers().stream()
@@ -127,13 +137,13 @@ public class PaymentService {
                     .name(item.getName())
                     .price(UtilService.toStringDefaulterZero(item.getPrice()))
                     .remark(item.getRemark())
-                    .stock(UtilService.toStringDefaulterZero(item.getStock()))
-                        .tags(item.getTags().stream()
-                                .map(tag -> ItemTagResponse.builder()
-                                        .id(tag.getId())
-                                        .name(tag.getName())
-                                        .build())
-                                .toList())
+                    .stock(item.getStock())
+                    .tags(item.getTags().stream()
+                        .map(tag -> ItemTagResponse.builder()
+                                .id(tag.getId())
+                                .name(tag.getName())
+                                .build())
+                        .toList())
                     .build())
                 .toList();
         return Response.builder()
@@ -142,53 +152,129 @@ public class PaymentService {
                 .build();
     }
 
+    public Response calculate(CalculateRequest request)
+            throws DataNotFoundException, JsonProcessingException {
 
-    public Response calculate(CalculateRequest request, String mode) throws DataNotFoundException, JsonProcessingException {
-        List<CartItemRequest> cartItems = request.getItems();
-        boolean isFinalize = "finalize".equalsIgnoreCase(mode);
-        List<EPromotion> allPromotions  = promotionService.findByActive();
-        List<FreeGiftResponse> allFreeGifts = promotionService.getAllFreeGifts();
+        final List<CartItemRequest> cartItems = request.getItems();
 
-        BigDecimal totalBeforeDiscount = cartItems.stream()
+        // เตรียมข้อมูลต้นทาง
+        final List<EPromotion> allPromotions  = promotionService.findByActive();
+        final List<FreeGiftResponse> allFreeGifts = promotionService.getAllFreeGifts();
+
+        // คำนวณแกนหลัก (รายการ/ส่วนลดต่อแถว/คำเตือน/โปรฯ MORE_THAN)
+        CoreCalc core = computeCore(cartItems, allPromotions, allFreeGifts);
+
+        // เลือกโปรฯ MORE_THAN + ยอดส่วนลดเพิ่มเติม
+        MoreThanPick pick = pickMoreThan(core.getTotalAfterItemDiscount(), core.getMoreThanCandidates());
+
+        // รวมยอดสุดท้าย (รวม MORE_THAN เข้าไปด้วย)
+        BigDecimal finalTotalDiscount = core.getTotalItemDiscount().add(pick.getMoreThanDiscount());
+        BigDecimal finalTotalAfter    = core.getTotalAfterItemDiscount().subtract(pick.getMoreThanDiscount()).max(BigDecimal.ZERO);
+
+        // ทำ cart hash (กันแก้ cart ระหว่าง preview→finalize)
+        final String cartHash = sha256Hex(toStableCartJson(cartItems));
+
+        // payload สำหรับตอบกลับ/เก็บ session
+        CartCalculationResultResponse result = CartCalculationResultResponse.builder()
+                .items(core.getItemResponses())
+                .totalBeforeDiscount(core.getTotalBeforeDiscount())
+                .totalDiscount(finalTotalDiscount)      // รวม MORE_THAN แล้ว
+                .totalAfterDiscount(finalTotalAfter)    // หัก MORE_THAN แล้ว
+                .warningPromotions(core.getWarningPromotions())
+                .overallPromotion(pick.getOverall())         // อาจเป็น null
+                .build();
+
+        final String invoiceNoReq = request.getInvoiceNo();
+
+        final String invoiceNo = (invoiceNoReq != null && !invoiceNoReq.isBlank())
+                ? invoiceNoReq
+                : LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS"));
+
+        EInvoiceSession session = calculationSessionService.getOrNewByInvoiceNo(invoiceNo);
+        session.setInvoiceNo(invoiceNo);
+        session.setCartHash(cartHash);
+        session.setPayloadJson(objectMapper.writeValueAsString(result));
+        session.setTotalBefore(core.getTotalBeforeDiscount());
+        session.setTotalDiscount(finalTotalDiscount);
+        session.setTotalAfter(finalTotalAfter);
+        session.setStatus("WAITING PAYMENT");
+        calculationSessionService.save(session);
+
+        result.setInvoiceNo(invoiceNo);
+        return Response.builder().code(200).data(result).build();
+
+//        // -------- FINALIZE --------
+//        if (invoiceNo == null || invoiceNo.isBlank()) {
+//            throw new IllegalArgumentException("invoiceNo is required for finalize");
+//        }
+//
+//        ECalculationSession session = calculationSessionService.getByCalculationId(invoiceNo);
+//        if (!"PREVIEW".equals(session.getStatus())) {
+//            throw new IllegalStateException("Session already finalized or expired");
+//        }
+//        if (session.getExpiresAt().isBefore(LocalDateTime.now())) {
+//            session.setStatus("EXPIRED");
+//            calculationSessionService.save(session);
+//            throw new IllegalStateException("Preview session expired, please recalculate");
+//        }
+//        if (!Objects.equals(session.getCartHash(), cartHash)) {
+//            throw new IllegalStateException("Cart changed since preview, please recalculate");
+//        }
+//
+//        // ตรึงผลตาม preview เด๊ะ ๆ (ป้องกัน drift)
+//        CartCalculationResultResponse previewResult =
+//                objectMapper.readValue(session.getPayloadJson(), CartCalculationResultResponse.class);
+//
+//        // หักโควตา (ทางเลือก A: UPDATE อะตอมมิก) ตาม "จำนวนชิ้นของแถมจริง"
+//        promotionService.consumePromotionQuotas(previewResult);
+//
+//        session.setStatus("FINALIZED");
+//        session.setFinalizedAt(LocalDateTime.now());
+//        calculationSessionService.save(session);
+//
+//        previewResult.setCalculationId(invoiceNo);
+//        previewResult.setExpiresInSec(0);
+//        return Response.builder().code(200).data(previewResult).build();
+    }
+
+    // คำนวณแกนหลัก: ต่อแถว/ของแถม/คำเตือน/รวมยอด (ยังไม่รวม MORE_THAN)
+    private CoreCalc computeCore(List<CartItemRequest> cartItems,
+                                 List<EPromotion> allPromotions,
+                                 List<FreeGiftResponse> allFreeGifts) throws DataNotFoundException {
+
+        BigDecimal totalBefore = cartItems.stream()
                 .map(CartItemRequest::getTotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         List<CartItemResponse> itemResponses = new ArrayList<>();
         BigDecimal totalDiscount = BigDecimal.ZERO;
-        List<String> warningPromotions = new ArrayList<>();
+        List<String> warnings = new ArrayList<>();
 
-        // แยก item ที่เป็นของแถมออกจาก item ปกติ
+        // ของแถมทั้งหมด
         Set<Long> freeGiftItemIds = allFreeGifts.stream()
                 .map(FreeGiftResponse::getFreeItemId)
                 .collect(Collectors.toSet());
 
-        // Map เก็บ itemId => CartItemRequest เพื่ออ้างอิงในภายหลัง
-        Map<Long, CartItemRequest> cartItemById = cartItems.stream()
+        Map<Long, CartItemRequest> cartById = cartItems.stream()
                 .collect(Collectors.toMap(CartItemRequest::getItemId, Function.identity()));
 
-        // เก็บ applied promotions ของแต่ละ itemId
-        Map<Long, List<AppliedPromotionResponse>> appliedPromotionsMap = new HashMap<>();
-        // เก็บส่วนลดรวมของแต่ละ itemId
+        Map<Long, List<AppliedPromotionResponse>> appliedMap = new HashMap<>();
         Map<Long, BigDecimal> discountMap = new HashMap<>();
+        Set<Long> pickedFreeGiftIds = cartItems.stream()
+                .map(CartItemRequest::getItemId)
+                .filter(freeGiftItemIds::contains)
+                .collect(Collectors.toSet());
 
-        // เก็บ itemId ที่เป็นของแถม และถือว่า "หยิบของแถมแล้ว" (ไม่ต้องคิดโปรโมชั่นเพิ่ม)
-        Set<Long> freeGiftPickedItemIds = new HashSet<>();
-
-        for (CartItemRequest item : cartItems) {
-            if (freeGiftItemIds.contains(item.getItemId())) {
-                // ถ้าเป็นของแถม ให้ข้ามการคำนวณโปรโมชั่นอื่น
-                freeGiftPickedItemIds.add(item.getItemId());
-            }
-        }
         List<EPromotion> moreThanPromos = new ArrayList<>();
+
+        // 1) คำนวณไอเท็มปกติ
         for (CartItemRequest item : cartItems) {
-            // ข้าม item ที่เป็นของแถม (คำนวณตอนท้ายแยกต่างหาก)
-            if (freeGiftPickedItemIds.contains(item.getItemId())) continue;
+            if (pickedFreeGiftIds.contains(item.getItemId())) continue;
 
             EItem entityItem = itemsService.getById(item.getItemId());
-            List<EPromotion> applicablePromotions = filterPromotionsForItem(allPromotions, entityItem);
+            List<EPromotion> applicable = filterPromotionsForItem(allPromotions, entityItem);
 
-            List<EPromotion> sorted = applicablePromotions.stream()
+            List<EPromotion> sorted = applicable.stream()
                     .sorted(Comparator.comparing(p -> getDiscountSeq(p.getDiscountType())))
                     .toList();
 
@@ -198,53 +284,30 @@ public class PaymentService {
 
             for (EPromotion promo : sorted) {
                 if (promo.getDiscountType() == EnumUtil.DISCOUNT_TYPE.MORE_THAN) {
-                    // เก็บโปรโมชันที่เป็นแบบ "มากกว่า" ไว้คำนวณทีหลัง
                     moreThanPromos.add(promo);
                     continue;
                 }
-                if (hasNormalApplied && EnumUtil.DISCOUNT_TYPE.NORMAL == promo.getDiscountType()) continue;
-                if (EnumUtil.DISCOUNT_TYPE.NORMAL == promo.getDiscountType()) hasNormalApplied = true;
+                if (hasNormalApplied && promo.getDiscountType() == EnumUtil.DISCOUNT_TYPE.NORMAL) continue;
+                if (promo.getDiscountType() == EnumUtil.DISCOUNT_TYPE.NORMAL) hasNormalApplied = true;
 
-                DiscountResult discount = calculateDiscount(item, promo, cartItems);
-                if (discount.getAmount().compareTo(BigDecimal.ZERO) > 0) {
-                    itemDiscount = itemDiscount.add(discount.getAmount());
-                    applied.add(toResponse(promo, discount.getAmount()));
+                DiscountResult dr = calculateDiscount(item, promo, cartItems);
+                if (dr.getAmount().compareTo(BigDecimal.ZERO) > 0) {
+                    itemDiscount = itemDiscount.add(dr.getAmount());
+                    applied.add(toResponse(promo, dr.getAmount()));
                 }
-                // ถ้าโปรโมชันเป็นของแถม ให้โยกไปเก็บที่ของแถมแทน (handled later)
-                if (promo.getDiscountType() == EnumUtil.DISCOUNT_TYPE.FREE) {
-                    // ทำ nothing ที่นี่ เพื่อรวมส่วนลดไปเก็บที่ของแถมตอนหลัง
-                    // แต่เก็บ warning ถ้ามีของแถมไม่ครบ
-                    if (discount.getGifts() != null && !discount.getGifts().isEmpty()) {
-                        String warning = String.format(
-                                "โปรโมชัน '%s' ยังไม่ได้หยิบของแถมมาให้ครบสำหรับสินค้า %s",
-                                promo.getName(), item.getName()
-                        );
-                        warningPromotions.add(warning);
-                    }
+                if (promo.getDiscountType() == EnumUtil.DISCOUNT_TYPE.FREE && dr.getGifts() != null && !dr.getGifts().isEmpty()) {
+                    warnings.add(String.format("โปรโมชัน '%s' ยังไม่ได้หยิบของแถมมาให้ครบสำหรับสินค้า %s",
+                            promo.getName(), item.getName()));
                 }
             }
-
-            appliedPromotionsMap.put(item.getItemId(), applied);
+            appliedMap.put(item.getItemId(), applied);
             discountMap.put(item.getItemId(), itemDiscount);
         }
 
-        // คำนวณโปรโมชั่นของแถม (FREE) และโยก applied promotion ไปให้ของแถม
+        // 2) คำนวณของแถม (FREE) ไปลงที่ไอเท็มของแถม
         for (CartItemRequest item : cartItems) {
-            if (!freeGiftPickedItemIds.contains(item.getItemId())) continue;
+            if (!pickedFreeGiftIds.contains(item.getItemId())) continue;
 
-            // หาของแถมที่เกี่ยวข้อง
-            List<FreeGiftResponse> giftsForItem = allFreeGifts.stream()
-                    .filter(g -> Objects.equals(g.getFreeItemId(), item.getItemId()))
-                    .toList();
-
-            if (giftsForItem.isEmpty()) {
-                // ไม่มีของแถมที่เกี่ยวข้องจริง ๆ
-                appliedPromotionsMap.put(item.getItemId(), List.of());
-                discountMap.put(item.getItemId(), BigDecimal.ZERO);
-                continue;
-            }
-
-            // หา promotion ที่เกี่ยวข้องกับของแถมนี้
             List<EPromotion> relatedPromos = allPromotions.stream()
                     .filter(promo -> promotionService.getFreeGiftByPromotionId(promo.getId()).stream()
                             .anyMatch(g -> Objects.equals(g.getFreeItemId(), item.getItemId())))
@@ -254,22 +317,20 @@ public class PaymentService {
             List<AppliedPromotionResponse> applied = new ArrayList<>();
 
             for (EPromotion promo : relatedPromos) {
-                // หาจำนวนที่ลูกค้าควรจะได้รับของแถมนี้
                 List<EPromotionFreeGiftItem> gifts = promotionService.getFreeGiftByPromotionId(promo.getId()).stream()
                         .filter(g -> Objects.equals(g.getFreeItemId(), item.getItemId()))
                         .toList();
 
                 for (EPromotionFreeGiftItem gift : gifts) {
-                    CartItemRequest buyItem = cartItemById.get(gift.getBuyItemId());
+                    CartItemRequest buyItem = cartById.get(gift.getBuyItemId());
                     if (buyItem == null) continue;
 
-                    int requiredQuantity = extractRequiredQuantity(promo.getCondition()); // → จะได้ 1
+                    int requiredQuantity = extractRequiredQuantity(promo.getCondition());
                     int freeQuantity = promo.getAmount().intValue();
                     int eligibleCount = (buyItem.getQuantity() / requiredQuantity) * freeQuantity;
 
-                    // จำนวนที่ลูกค้าหยิบของแถมนี้เข้าตะกร้า
                     int inCartCount = item.getQuantity();
-                    int actualFreeCount = Math.min(inCartCount, eligibleCount); // ✅ สำคัญที่สุด
+                    int actualFreeCount = Math.min(inCartCount, eligibleCount); // จำนวนของแถมจริง
 
                     if (actualFreeCount > 0) {
                         BigDecimal discountAmount = item.getPrice().multiply(BigDecimal.valueOf(actualFreeCount));
@@ -279,20 +340,19 @@ public class PaymentService {
                                 .promotionId(promo.getId())
                                 .name(promo.getName())
                                 .discountAmount(discountAmount)
-                                .usedUnits(actualFreeCount)
+                                .usedUnits(actualFreeCount) // ใช้หักโควตาตอน finalize
                                 .build());
                     }
                 }
             }
-
-            appliedPromotionsMap.put(item.getItemId(), applied);
+            appliedMap.put(item.getItemId(), applied);
             discountMap.put(item.getItemId(), totalItemDiscount);
         }
 
-        // สร้าง response รายการสินค้า
+        // 3) สร้างรายการตอบกลับต่อแถว + รวมส่วนลดแถว
         for (CartItemRequest item : cartItems) {
             BigDecimal itemDiscount = discountMap.getOrDefault(item.getItemId(), BigDecimal.ZERO);
-            List<AppliedPromotionResponse> applied = appliedPromotionsMap.getOrDefault(item.getItemId(), List.of());
+            List<AppliedPromotionResponse> applied = appliedMap.getOrDefault(item.getItemId(), List.of());
 
             BigDecimal finalTotal = item.getTotal().subtract(itemDiscount);
             if (finalTotal.compareTo(BigDecimal.ZERO) < 0) finalTotal = BigDecimal.ZERO;
@@ -312,104 +372,76 @@ public class PaymentService {
             totalDiscount = totalDiscount.add(itemDiscount);
         }
 
-        BigDecimal totalAfterDiscount = totalBeforeDiscount.subtract(totalDiscount);
-        if (totalAfterDiscount.compareTo(BigDecimal.ZERO) < 0) {
-            totalAfterDiscount = BigDecimal.ZERO;
+        BigDecimal afterItemDiscount = totalBefore.subtract(totalDiscount).max(BigDecimal.ZERO);
+
+        return CoreCalc.builder()
+                .itemResponses(itemResponses)
+                .totalBeforeDiscount(totalBefore)
+                .totalItemDiscount(totalDiscount)
+                .totalAfterItemDiscount(afterItemDiscount)
+                .warningPromotions(warnings)
+                .moreThanCandidates(moreThanPromos)
+                .build();
+    }
+
+    // เลือกโปรฯ MORE_THAN ที่เข้าเงื่อนไขจากยอดหลังหักส่วนลดแถวแล้ว
+    private MoreThanPick pickMoreThan(BigDecimal baseAmount, List<EPromotion> candidates) {
+        if (candidates == null || candidates.isEmpty()) {
+            return MoreThanPick.builder()
+                    .overall(null)
+                    .moreThanDiscount(BigDecimal.ZERO)
+                    .build();
         }
 
-        final BigDecimal finalTotalAfterDiscount = totalAfterDiscount; // ✅ ทำให้ใช้ใน lambda ได้
-
-        BigDecimal moreThanDiscount = BigDecimal.ZERO;
-        EPromotion selectedMoreThanPromo = null;
-
-        List<EPromotion> eligibleMoreThanPromos = moreThanPromos.stream()
-                .map(p -> {
-                    BigDecimal conditionAmount = extractConditionAmount(p.getCondition());
-                    return new AbstractMap.SimpleEntry<>(p, conditionAmount);
-                })
-                .filter(e -> e.getValue().compareTo(finalTotalAfterDiscount) <= 0) // ✅ ใช้ตัวนี้แทน
+        List<EPromotion> eligible = candidates.stream()
+                .map(p -> Map.entry(p, extractConditionAmount(p.getCondition())))
+                .filter(e -> e.getValue().compareTo(baseAmount) <= 0)
                 .sorted((e1, e2) -> e2.getValue().compareTo(e1.getValue()))
                 .map(Map.Entry::getKey)
                 .toList();
 
-        if (!eligibleMoreThanPromos.isEmpty()) {
-            selectedMoreThanPromo = eligibleMoreThanPromos.get(0);
-            moreThanDiscount = selectedMoreThanPromo.getAmount();
-        }
-
-        AppliedPromotionResponse overall = null;
-        if (selectedMoreThanPromo != null) {
-            overall = AppliedPromotionResponse.builder()
-                    .promotionId(selectedMoreThanPromo.getId())
-                    .name(selectedMoreThanPromo.getName())
-                    .discountAmount(moreThanDiscount)
-                    .build();
-        }
-        String cartHash = Hashing.sha256()
-                .hashString(new ObjectMapper().writeValueAsString(cartItems), StandardCharsets.UTF_8)
-                .toString();
-
-        CartCalculationResultResponse result = CartCalculationResultResponse.builder()
-                .items(itemResponses)
-                .totalBeforeDiscount(totalBeforeDiscount)
-                .totalDiscount(totalDiscount)
-                .totalAfterDiscount(totalAfterDiscount)
-                .warningPromotions(warningPromotions)
-                .overallPromotion(overall)
+        if (eligible.isEmpty()) return MoreThanPick.builder()
+                .overall(null)
+                .moreThanDiscount(BigDecimal.ZERO)
                 .build();
-        String calculationId = request.getCalculationId();
-        if (!isFinalize) {
-            // ===== PREVIEW =====
-            String calcId = (calculationId != null && !calculationId.isBlank())
-                    ? calculationId
-                    : UUID.randomUUID().toString();
 
-            ECalculationSession session = calculationSessionService.getOrNewByCalculationId(calcId);
-            session.setCalculationId(calcId);
-            session.setCartHash(cartHash);
-            session.setPayloadJson(new ObjectMapper().writeValueAsString(result));
-            session.setTotalBefore(totalBeforeDiscount);
-            session.setTotalDiscount(totalDiscount);
-            session.setTotalAfter(totalAfterDiscount);
-            session.setStatus("PREVIEW");
-            session.setExpiresAt(LocalDateTime.now().plusSeconds(PREVIEW_EXPIRES_SEC));
-            calculationSessionService.save(session);
-            result.setCalculationId(calcId);
-            result.setExpiresInSec(PREVIEW_EXPIRES_SEC);
-            return Response.builder().code(200).data(result).build();
-        } else {
-            // ===== FINALIZE =====
-            if (calculationId == null || calculationId.isBlank()) {
-                throw new IllegalArgumentException("calculationId is required for finalize");
-            }
-            ECalculationSession session = calculationSessionService.getByCalculationId(calculationId);
-            if (!"PREVIEW".equals(session.getStatus())) {
-                throw new IllegalStateException("Session already finalized or expired");
-            }
-            if (session.getExpiresAt().isBefore(LocalDateTime.now())) {
-                // session หมดอายุ
-                session.setStatus("EXPIRED");
-                calculationSessionService.save(session);
-                throw new IllegalStateException("Preview session expired, please recalculate");
-            }
-            if (!Objects.equals(session.getCartHash(), cartHash)) {
-                throw new IllegalStateException("Cart changed since preview, please recalculate");
-            }
+        EPromotion selected = eligible.get(0);
+        BigDecimal moreThanDiscount = selected.getAmount();
 
-            // อ่าน previewResult: ถ้าคุณ "ตรึงผล" ตาม preview ให้ parse จาก session.payloadJson
-            CartCalculationResultResponse previewResult =
-                    new ObjectMapper().readValue(session.getPayloadJson(), CartCalculationResultResponse.class);
-            // หักโควตา (ตามจำนวนชิ้นของแถมจริง)
-            promotionService.consumePromotionQuotas(previewResult);
+        AppliedPromotionResponse overall = AppliedPromotionResponse.builder()
+                .promotionId(selected.getId())
+                .name(selected.getName())
+                .discountAmount(moreThanDiscount)
+                .build();
 
-            session.setStatus("FINALIZED");
-            session.setFinalizedAt(LocalDateTime.now());
-            calculationSessionService.save(session);
+        return MoreThanPick.builder()
+                .overall(overall)
+                .moreThanDiscount(moreThanDiscount)
+                .build();
+    }
 
-            // แนบค่าเดิมกลับ (หรือจะดึงจาก session.payloadJson ก็ได้ถ้าอยาก "ตรึง" ตาม preview เด๊ะๆ)
-            result.setCalculationId(calculationId);
-            result.setExpiresInSec(0);
-            return Response.builder().code(200).data(result).build();
+
+    private String toStableCartJson(List<CartItemRequest> cartItems) {
+        List<CartItemRequest> sorted = new ArrayList<>(cartItems);
+        sorted.sort(Comparator
+                .comparing(CartItemRequest::getKey, Comparator.nullsFirst(String::compareTo))
+                .thenComparing(ci -> String.valueOf(ci.getItemId()), Comparator.nullsFirst(String::compareTo)));
+        try {
+            return objectMapper.writeValueAsString(sorted);
+        } catch (Exception e) {
+            return String.valueOf(sorted.hashCode());
+        }
+    }
+
+    private static String sha256Hex(String input) {
+        try {
+            var md = java.security.MessageDigest.getInstance("SHA-256");
+            byte[] bytes = md.digest(input.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            StringBuilder sb = new StringBuilder();
+            for (byte b : bytes) sb.append(String.format("%02x", b));
+            return sb.toString();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -568,5 +600,31 @@ public class PaymentService {
     }
 
 
-
+    public Response generateQrCode(GenerateQrRequest req) throws Exception {
+        if (props.getReceiverPhone()==null && props.getReceiverNationalId()==null){
+            throw new IllegalStateException("PromptPay receiver not configured");
+        }
+        String calcId = (req.getInvoiceNo() != null && !req.getInvoiceNo().isBlank())
+                ? req.getInvoiceNo()
+                : UUID.randomUUID().toString();
+        BigDecimal amount = req.getAmount(); // validate มาแล้วจาก @Valid
+        String payload;
+        if (props.getReceiverPhone()!=null){
+            payload = PromptPayUtil.buildPayloadPhone(props.getReceiverPhone(), amount);
+        } else {
+            payload = PromptPayUtil.buildPayloadNationalId(props.getReceiverNationalId(), amount);
+        }
+        LocalDateTime expiresAt = ZonedDateTime.now().plusSeconds(props.getExpiresSeconds()).toLocalDateTime();
+        return Response.builder()
+                .code(200)
+                .data(GenerateQrResponse.builder()
+                    .invoiceNo(calcId)
+                    .payload(payload)
+                    .imageBase64(qrService.toPngBase64(payload, 240))
+                    .contentType("image/png")
+                    .expiresAt(expiresAt.toString())
+                    .amount(amount.doubleValue())
+                    .build())
+                .build();
+    }
 }

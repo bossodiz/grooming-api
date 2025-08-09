@@ -15,3 +15,8 @@ spring:
 jwt:
   secret-key: NkQyYzNsbmQxNTJhZTJwZ2p2ZGZ5bjRkdmkwb0x6W0xFSF5Gb+OXy7hOjz7hGjmI==
   expiration: 86400000 # 1 วัน (มิลลิวินาที)
+
+payment:
+  promptpay:
+    receiverPhone: "0812345678"   # หรือคอมเมนต์บรรทัดนี้ถ้าใช้ National ID
+    expiresSeconds: 180           # เวลาให้ลูกค้าสแกน (วินาที)

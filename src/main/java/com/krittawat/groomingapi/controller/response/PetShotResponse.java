@@ -15,6 +15,6 @@ public class PetShotResponse {
     private String remark;
     private String tag;
     private String price;
-    private String stock;
+    private Integer stock;
     private List<ItemTagResponse> tags;
 }
