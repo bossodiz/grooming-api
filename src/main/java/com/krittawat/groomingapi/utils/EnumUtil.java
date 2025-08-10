@@ -31,10 +31,9 @@ public class EnumUtil {
     @Getter
     @AllArgsConstructor
     public enum PAYMENT_TYPE {
-        CASH_PAYMENT("เงินสด", "Cash"),
-        QR_PAYMENT("QR Code", "QR Code");
-        private final String nameTh;
-        private final String nameEn;
+        CASH_PAYMENT("CASH"),
+        QR_PAYMENT("QR");
+        private final String name;
     }
 
     @Getter

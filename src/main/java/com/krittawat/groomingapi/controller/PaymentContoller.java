@@ -2,6 +2,7 @@ package com.krittawat.groomingapi.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.krittawat.groomingapi.controller.request.CalculateRequest;
+import com.krittawat.groomingapi.controller.request.ConfirmPaymentRequest;
 import com.krittawat.groomingapi.controller.request.GenerateQrRequest;
 import com.krittawat.groomingapi.controller.response.Response;
 import com.krittawat.groomingapi.error.DataNotFoundException;
@@ -47,6 +48,11 @@ public class PaymentContoller {
     @PostMapping("/generate-qr")
     public Response generateQr(@Valid @RequestBody GenerateQrRequest request) throws Exception {
         return paymentService.generateQrCode(request);
+    }
+
+    @PostMapping("/confirm")
+    public Response confirm(@Valid @RequestBody ConfirmPaymentRequest request) throws Exception {
+        return paymentService.confirm(request);
     }
 
 

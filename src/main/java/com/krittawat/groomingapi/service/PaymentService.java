@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.krittawat.groomingapi.config.PromptPayProperties;
 import com.krittawat.groomingapi.controller.request.CalculateRequest;
 import com.krittawat.groomingapi.controller.request.CartItemRequest;
+import com.krittawat.groomingapi.controller.request.ConfirmPaymentRequest;
 import com.krittawat.groomingapi.controller.request.GenerateQrRequest;
 import com.krittawat.groomingapi.controller.response.*;
 import com.krittawat.groomingapi.datasource.entity.EInvoiceSession;
@@ -22,6 +23,7 @@ import com.krittawat.groomingapi.service.model.MoreThanPick;
 import com.krittawat.groomingapi.utils.EnumUtil;
 import com.krittawat.groomingapi.utils.PromptPayUtil;
 import com.krittawat.groomingapi.utils.UtilService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -625,6 +627,14 @@ public class PaymentService {
                     .expiresAt(expiresAt.toString())
                     .amount(amount.doubleValue())
                     .build())
+                .build();
+    }
+
+    public Response confirm(@Valid ConfirmPaymentRequest request) {
+
+        return Response.builder()
+                .code(200)
+                .data("Payment confirmed successfully")
                 .build();
     }
 }
