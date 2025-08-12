@@ -1,6 +1,7 @@
 package com.krittawat.groomingapi.controller.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.krittawat.groomingapi.service.model.ManualDiscount;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,5 +22,6 @@ public class CartCalculationResultResponse {
     private BigDecimal totalAfterDiscount;
     private List<String> warningPromotions;
     private AppliedPromotionResponse overallPromotion;
+    private ManualDiscount manualDiscount;
     private String invoiceNo;
 }

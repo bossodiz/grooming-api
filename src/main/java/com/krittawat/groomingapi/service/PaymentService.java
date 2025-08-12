@@ -28,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -173,6 +174,28 @@ public class PaymentService {
         BigDecimal finalTotalDiscount = core.getTotalItemDiscount().add(pick.getMoreThanDiscount());
         BigDecimal finalTotalAfter    = core.getTotalAfterItemDiscount().subtract(pick.getMoreThanDiscount()).max(BigDecimal.ZERO);
 
+        if (request.getManualDiscount() != null && request.getManualDiscount().getType() != null && request.getManualDiscount().getValue() != null) {
+            switch (request.getManualDiscount().getType()) {
+                case "AMOUNT" -> {
+                    BigDecimal manualAmount = request.getManualDiscount().getValue();
+                    if (manualAmount.compareTo(BigDecimal.ZERO) > 0) {
+                        finalTotalDiscount = finalTotalDiscount.add(manualAmount);
+                        finalTotalAfter = finalTotalAfter.subtract(manualAmount).max(BigDecimal.ZERO);
+                        request.getManualDiscount().setAmount(manualAmount);
+                    }
+                }
+                case "PERCENT" -> {
+                    BigDecimal manualPercent = request.getManualDiscount().getValue();
+                    if (manualPercent.compareTo(BigDecimal.ZERO) > 0) {
+                        BigDecimal discountAmount = finalTotalAfter.multiply(manualPercent).divide(BigDecimal.valueOf(100), 0 , RoundingMode.CEILING);
+                        finalTotalDiscount = finalTotalDiscount.add(discountAmount);
+                        finalTotalAfter = finalTotalAfter.subtract(discountAmount).max(BigDecimal.ZERO);
+                        request.getManualDiscount().setAmount(discountAmount);
+                    }
+                }
+            }
+        }
+
         // ทำ cart hash (กันแก้ cart ระหว่าง preview→finalize)
         final String cartHash = sha256Hex(toStableCartJson(cartItems));
 
@@ -184,6 +207,7 @@ public class PaymentService {
                 .totalAfterDiscount(finalTotalAfter)    // หัก MORE_THAN แล้ว
                 .warningPromotions(core.getWarningPromotions())
                 .overallPromotion(pick.getOverall())         // อาจเป็น null
+                .manualDiscount(request.getManualDiscount())
                 .build();
 
         final String invoiceNoReq = request.getInvoiceNo();
@@ -493,7 +517,9 @@ public class PaymentService {
 
     private DiscountResult calculateNormalDiscount(BigDecimal total, EPromotion promo) {
         if (EnumUtil.AMOUNT_TYPE.PERCENT == promo.getAmountType()) {
-            BigDecimal discount = total.multiply(promo.getAmount()).divide(BigDecimal.valueOf(100));
+            BigDecimal discount = total
+                    .multiply(promo.getAmount())
+                    .divide(BigDecimal.valueOf(100), 0, RoundingMode.CEILING); // ปัดขึ้น 2 ตำแหน่งทศนิยม
             return DiscountResult.of(discount);
         } else if (EnumUtil.AMOUNT_TYPE.BAHT == promo.getAmountType()) {
             return DiscountResult.of(promo.getAmount());
