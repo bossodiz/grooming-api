@@ -60,6 +60,7 @@ public class ItemsService {
 
     public List<EItem> getItemsByType(EnumUtil.ITEM_TYPE type) {
         return switch (type) {
+            case ALL -> itemsRepository.findAll();
             case GROOMING -> getGroomingService();
             case PET_SHOP -> getProducts();
         };
@@ -79,5 +80,14 @@ public class ItemsService {
 
     public boolean existsExcludedByPromotionIdAndItemId(Long id, Long id1) {
         return promotionExcludedItemRepository.existsByPromotionIdAndItemId(id, id1);
+    }
+
+    public List<EItem> getItemsByPromotionIdAndInclude(Long id) {
+        return promotionIncludedItemRepository.findAllByPromotionId(id);
+    }
+
+
+    public List<EItem> getItemsByPromotionIdAndExclude(Long id) {
+        return promotionExcludedItemRepository.findAllByPromotionId(id);
     }
 }

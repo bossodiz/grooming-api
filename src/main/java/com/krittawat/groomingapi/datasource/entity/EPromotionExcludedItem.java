@@ -25,4 +25,6 @@ public class EPromotionExcludedItem {
     @CreationTimestamp
     @Column(name = "created_at")
     private String createdAt;
+    @Column(name = "status")
+    private Boolean status;
 }

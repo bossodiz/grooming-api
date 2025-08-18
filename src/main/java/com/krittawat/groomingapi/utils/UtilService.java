@@ -128,4 +128,10 @@ public class UtilService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         return value.format(formatter);
     }
+
+    public static String toStringFull(LocalDateTime value) {
+        if (value == null) return null;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+        return value.format(formatter);
+    }
 }

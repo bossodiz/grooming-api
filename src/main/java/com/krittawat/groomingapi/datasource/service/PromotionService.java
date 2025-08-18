@@ -108,7 +108,7 @@ public class PromotionService {
 
             // ข้ามถ้า quota ไม่จำกัด
             EPromotion p = getById(promoId);
-            if (p.getQuota() == null || p.getQuota() == -1) continue;
+            if (p.getQuota() == null) continue;
 
             int updated = consumeQuota(promoId, amount);
             if (updated == 0) {

@@ -76,6 +76,7 @@ public class EnumUtil {
     @Getter
     @AllArgsConstructor
     public enum ITEM_TYPE {
+        ALL("ALL"),
         GROOMING("GROOMING"),
         PET_SHOP("PET_SHOP");
         private final String name;

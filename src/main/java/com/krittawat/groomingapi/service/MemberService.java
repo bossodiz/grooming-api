@@ -202,7 +202,7 @@ public class MemberService {
                                 .typeId(pet.getTypeId())
                                 .weight(UtilService.toStringDefaulterDash(pet.getWeight()))
                                 .service(UtilService.toStringDefaulterZero(pet.getServiceCount()))
-                                .build()))
+                                .build()).toList())
                 .build();
     }
 }

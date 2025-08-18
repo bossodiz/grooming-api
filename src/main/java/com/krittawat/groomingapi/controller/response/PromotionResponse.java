@@ -17,7 +17,10 @@ public class PromotionResponse {
     private String endDate;
     private String specificDays;
     private Boolean customerOnly;
-    private Boolean status;
+    private String status;
+    private Boolean isStatus;
     private Integer quota;
     private String condition;
+    private String createdAt;
+    private String updatedAt;
 }

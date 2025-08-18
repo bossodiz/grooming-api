@@ -501,7 +501,7 @@ public class PaymentService {
     }
 
     private DiscountResult calculateDiscount(CartItemRequest item, EPromotion promo, List<CartItemRequest> allCartItems) throws DataNotFoundException {
-        if (promo.getQuota() != null && promo.getQuota() != -1 && promo.getQuota() <= 0) {
+        if (promo.getQuota() != null && promo.getQuota() <= 0) {
             return DiscountResult.noDiscount();
         }
         BigDecimal total = item.getTotal();
