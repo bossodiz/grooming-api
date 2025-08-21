@@ -134,4 +134,29 @@ public class UtilService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
         return value.format(formatter);
     }
+
+    public static int extractRequiredQuantity(String condition) {
+        if (condition != null && condition.startsWith("BUY_")) {
+            try {
+                return Integer.parseInt(condition.substring(4));
+            } catch (NumberFormatException e) {
+                // Default fallback ถ้า parsing ไม่ได้
+                return 1;
+            }
+        }
+        return 1; // Default
+    }
+
+    public static BigDecimal extractConditionAmount(String condition) {
+        if (condition != null && condition.startsWith("AMOUNT>")) {
+            try {
+                String amountStr = condition.substring("AMOUNT>".length());
+                return new BigDecimal(amountStr);
+            } catch (NumberFormatException e) {
+                // กรณี format ผิด
+                return BigDecimal.ZERO;
+            }
+        }
+        return BigDecimal.ZERO;
+    }
 }

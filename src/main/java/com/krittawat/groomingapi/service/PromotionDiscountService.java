@@ -1,5 +1,6 @@
 package com.krittawat.groomingapi.service;
 
+import com.krittawat.groomingapi.controller.request.PromotionDetailRequest;
 import com.krittawat.groomingapi.controller.response.PromotionItem;
 import com.krittawat.groomingapi.controller.response.PromotionResponse;
 import com.krittawat.groomingapi.controller.response.Response;
@@ -8,6 +9,7 @@ import com.krittawat.groomingapi.datasource.entity.EPromotion;
 import com.krittawat.groomingapi.datasource.service.ItemsService;
 import com.krittawat.groomingapi.datasource.service.PromotionService;
 import com.krittawat.groomingapi.error.DataNotFoundException;
+import com.krittawat.groomingapi.service.model.AmountDetail;
 import com.krittawat.groomingapi.utils.EnumUtil;
 import com.krittawat.groomingapi.utils.UtilService;
 import lombok.RequiredArgsConstructor;
@@ -30,14 +32,13 @@ public class PromotionDiscountService {
         List<PromotionResponse> promotions = new ArrayList<>();
         LocalDateTime now = LocalDateTime.now();
         for (EPromotion promotion : list) {
+            AmountDetail amountDetail = new AmountDetail(promotion.getDiscountType(), promotion.getCondition(), promotion.getAmount(), promotion.getAmountType());
             promotions.add(PromotionResponse.builder()
                 .id(promotion.getId())
                 .name(promotion.getName())
                 .discountCategory(UtilService.getNameThDefaulterDash(promotion.getDiscountCategory()))
-                .discountType(UtilService.getNameThDefaulterDash(promotion.getDiscountType()))
-                .amount(UtilService.toString(promotion.getAmount(), 0))
-                .amountType(UtilService.getNameThDefaulterDash(promotion.getAmountType()))
-                .periodType(UtilService.getNameThDefaulterDash(promotion.getPeriodType()))
+                .amount(amountDetail.getDetail())
+                .periodType(promotion.getPeriodType().name())
                 .startDate(UtilService.toString(promotion.getStartDate()))
                 .endDate(UtilService.toString(promotion.getEndDate()))
                 .specificDays(UtilService.getNameThDefaulterDash(promotion.getSpecificDays()))
@@ -70,12 +71,17 @@ public class PromotionDiscountService {
 
     public Response getById(Long id) throws DataNotFoundException {
         EPromotion promotion = promotionService.getById(id);
+        AmountDetail amountDetail = new AmountDetail(promotion.getDiscountType(), promotion.getCondition(), promotion.getAmount(), promotion.getAmountType());
         PromotionResponse response = PromotionResponse.builder()
                 .id(promotion.getId())
                 .name(promotion.getName())
                 .discountCategory(promotion.getDiscountCategory().name())
                 .discountType(promotion.getDiscountType().name())
-                .amount(UtilService.toString(promotion.getAmount(), 0))
+                .amountNormal(amountDetail.getAmountNormal())
+                .amountMoreThan(amountDetail.getAmountMoreThan())
+                .discountMoreThan(amountDetail.getDiscountMoreThan())
+                .amountFree(amountDetail.getAmountFree())
+                .amountFreeBonus(amountDetail.getAmountFreeBonus())
                 .amountType(promotion.getAmountType().name())
                 .periodType(promotion.getPeriodType().name())
                 .startDate(UtilService.toStringFull(promotion.getStartDate()))
@@ -84,6 +90,7 @@ public class PromotionDiscountService {
                 .customerOnly(promotion.getCustomerOnly())
                 .isStatus(promotion.getStatus())
                 .quota(promotion.getQuota())
+                .quotaType(promotion.getQuota() == null ? 0 : 1)
                 .condition(promotion.getCondition())
                 .createdAt(UtilService.toStringFull(promotion.getCreatedAt()))
                 .updatedAt(UtilService.toStringFull(promotion.getUpdatedAt()))
@@ -138,6 +145,14 @@ public class PromotionDiscountService {
         return Response.builder()
                 .code(200)
                 .data(itemList)
+                .build();
+    }
+
+    public Response updatePromotion(Long id, PromotionDetailRequest request) throws DataNotFoundException {
+        EPromotion promotion = promotionService.getById(id);
+        return Response.builder()
+                .code(200)
+                .data(promotion)
                 .build();
     }
 }

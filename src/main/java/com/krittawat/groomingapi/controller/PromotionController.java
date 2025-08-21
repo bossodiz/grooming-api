@@ -1,14 +1,12 @@
 package com.krittawat.groomingapi.controller;
 
+import com.krittawat.groomingapi.controller.request.PromotionDetailRequest;
 import com.krittawat.groomingapi.controller.response.Response;
 import com.krittawat.groomingapi.error.DataNotFoundException;
 import com.krittawat.groomingapi.service.PromotionDiscountService;
 import com.krittawat.groomingapi.utils.EnumUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/promotion")
@@ -40,6 +38,11 @@ public class PromotionController {
     @GetMapping("{id}/exclude")
     public Response getPromotionExcludeItems(@PathVariable("id") Long id) throws DataNotFoundException {
         return promotionDiscountService.getPromotionExcludeItems(id);
+    }
+
+    @PutMapping("/{id}")
+    public Response updatePromotion(@PathVariable("id") Long id, @RequestBody PromotionDetailRequest request) throws DataNotFoundException {
+        return promotionDiscountService.updatePromotion(id, request);
     }
 
 

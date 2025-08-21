@@ -351,7 +351,7 @@ public class PaymentService {
                     CartItemRequest buyItem = cartById.get(gift.getBuyItemId());
                     if (buyItem == null) continue;
 
-                    int requiredQuantity = extractRequiredQuantity(promo.getCondition());
+                    int requiredQuantity = UtilService.extractRequiredQuantity(promo.getCondition());
                     int freeQuantity = promo.getAmount().intValue();
                     int eligibleCount = (buyItem.getQuantity() / requiredQuantity) * freeQuantity;
 
@@ -420,7 +420,7 @@ public class PaymentService {
         }
 
         List<EPromotion> eligible = candidates.stream()
-                .map(p -> Map.entry(p, extractConditionAmount(p.getCondition())))
+                .map(p -> Map.entry(p, UtilService.extractConditionAmount(p.getCondition())))
                 .filter(e -> e.getValue().compareTo(baseAmount) <= 0)
                 .sorted((e1, e2) -> e2.getValue().compareTo(e1.getValue()))
                 .map(Map.Entry::getKey)
@@ -537,7 +537,7 @@ public class PaymentService {
                 .filter(g -> Objects.equals(g.getBuyItemId(), item.getItemId()))
                 .map(g -> {
                     // ดึงค่า requiredQuantity จาก condition เช่น "BUY_1"
-                    int requiredQuantity = extractRequiredQuantity(promo.getCondition()); // → จะได้ 1
+                    int requiredQuantity = UtilService.extractRequiredQuantity(promo.getCondition()); // → จะได้ 1
 
                     // ของแถมที่ได้ทั้งหมดต่อการซื้อครบตามจำนวน
                     int freeQuantity = promo.getAmount().intValue();
@@ -601,32 +601,6 @@ public class PaymentService {
         }
         return new DiscountResult(BigDecimal.ZERO, missingFreeGifts);
     }
-
-    private int extractRequiredQuantity(String condition) {
-        if (condition != null && condition.startsWith("BUY_")) {
-            try {
-                return Integer.parseInt(condition.substring(4));
-            } catch (NumberFormatException e) {
-                // Default fallback ถ้า parsing ไม่ได้
-                return 1;
-            }
-        }
-        return 1; // Default
-    }
-
-    private BigDecimal extractConditionAmount(String condition) {
-        if (condition != null && condition.startsWith("AMOUNT>")) {
-            try {
-                String amountStr = condition.substring("AMOUNT>".length());
-                return new BigDecimal(amountStr);
-            } catch (NumberFormatException e) {
-                // กรณี format ผิด
-                return BigDecimal.ZERO;
-            }
-        }
-        return BigDecimal.ZERO;
-    }
-
 
     public Response generateQrCode(GenerateQrRequest req) throws Exception {
         if (props.getReceiverPhone()==null && props.getReceiverNationalId()==null){

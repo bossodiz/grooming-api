@@ -1,0 +1,14 @@
+package com.krittawat.groomingapi.controller.request;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.krittawat.groomingapi.service.model.PromotionDetail;
+import com.krittawat.groomingapi.service.model.PromotionItemWrapper;
+import lombok.Data;
+
+@Data
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class PromotionDetailRequest {
+    private PromotionDetail promotionDetail;
+    private PromotionItemWrapper included;
+    private PromotionItemWrapper excluded;
+}
