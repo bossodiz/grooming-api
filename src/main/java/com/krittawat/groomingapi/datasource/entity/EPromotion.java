@@ -43,17 +43,16 @@ public class EPromotion {
     private LocalDateTime startDate;
     @Column(name = "end_date")
     private LocalDateTime endDate;
-    @Enumerated(EnumType.STRING)
     @Column(name = "specific_days")
-    private EnumUtil.SPECIFIC_DAY specificDays;
+    private String specificDays;
     @Column(name = "customer_only")
     private Boolean customerOnly;
     @Column(name = "status")
     private Boolean status;
     @Column(name = "quota")
     private Integer quota;
-    @Column(name = "condition")
-    private String condition;
+    @Column(name = "condition_value")
+    private String conditionValue;
     @CreationTimestamp
     @Column(name = "created_at")
     private LocalDateTime createdAt;

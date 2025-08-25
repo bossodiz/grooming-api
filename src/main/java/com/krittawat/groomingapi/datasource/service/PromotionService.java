@@ -124,4 +124,8 @@ public class PromotionService {
         }
         return updatedRows;
     }
+
+    public void save(EPromotion promotion) {
+        promotionRepository.save(promotion);
+    }
 }

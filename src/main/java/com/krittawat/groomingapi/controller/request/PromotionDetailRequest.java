@@ -8,6 +8,7 @@ import lombok.Data;
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PromotionDetailRequest {
+    private Long promotionId;
     private PromotionDetail promotionDetail;
     private PromotionItemWrapper included;
     private PromotionItemWrapper excluded;

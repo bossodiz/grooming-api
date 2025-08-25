@@ -40,9 +40,9 @@ public class PromotionController {
         return promotionDiscountService.getPromotionExcludeItems(id);
     }
 
-    @PutMapping("/{id}")
-    public Response updatePromotion(@PathVariable("id") Long id, @RequestBody PromotionDetailRequest request) throws DataNotFoundException {
-        return promotionDiscountService.updatePromotion(id, request);
+    @PutMapping("/update")
+    public Response updatePromotion(@RequestBody PromotionDetailRequest request) throws DataNotFoundException {
+        return promotionDiscountService.updatePromotion(request);
     }
 
 

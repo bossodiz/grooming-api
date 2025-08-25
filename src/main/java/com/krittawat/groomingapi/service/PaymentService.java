@@ -351,7 +351,7 @@ public class PaymentService {
                     CartItemRequest buyItem = cartById.get(gift.getBuyItemId());
                     if (buyItem == null) continue;
 
-                    int requiredQuantity = UtilService.extractRequiredQuantity(promo.getCondition());
+                    int requiredQuantity = UtilService.extractRequiredQuantity(promo.getConditionValue());
                     int freeQuantity = promo.getAmount().intValue();
                     int eligibleCount = (buyItem.getQuantity() / requiredQuantity) * freeQuantity;
 
@@ -420,7 +420,7 @@ public class PaymentService {
         }
 
         List<EPromotion> eligible = candidates.stream()
-                .map(p -> Map.entry(p, UtilService.extractConditionAmount(p.getCondition())))
+                .map(p -> Map.entry(p, UtilService.extractConditionAmount(p.getConditionValue())))
                 .filter(e -> e.getValue().compareTo(baseAmount) <= 0)
                 .sorted((e1, e2) -> e2.getValue().compareTo(e1.getValue()))
                 .map(Map.Entry::getKey)
@@ -537,7 +537,7 @@ public class PaymentService {
                 .filter(g -> Objects.equals(g.getBuyItemId(), item.getItemId()))
                 .map(g -> {
                     // ดึงค่า requiredQuantity จาก condition เช่น "BUY_1"
-                    int requiredQuantity = UtilService.extractRequiredQuantity(promo.getCondition()); // → จะได้ 1
+                    int requiredQuantity = UtilService.extractRequiredQuantity(promo.getConditionValue()); // → จะได้ 1
 
                     // ของแถมที่ได้ทั้งหมดต่อการซื้อครบตามจำนวน
                     int freeQuantity = promo.getAmount().intValue();

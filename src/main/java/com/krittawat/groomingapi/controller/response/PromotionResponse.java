@@ -3,6 +3,9 @@ package com.krittawat.groomingapi.controller.response;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Data
 @Builder
 public class PromotionResponse {
@@ -20,15 +23,16 @@ public class PromotionResponse {
 
     private String amountType;
     private String periodType;
-    private String startDate;
-    private String endDate;
-    private String specificDays;
+    private String periodDate;
+    private LocalDateTime startDate;
+    private LocalDateTime endDate;
+    private List<String> specificDays;
     private Boolean customerOnly;
     private String status;
     private Boolean isStatus;
     private Integer quota;
     private Integer quotaType;
     private String condition;
-    private String createdAt;
-    private String updatedAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

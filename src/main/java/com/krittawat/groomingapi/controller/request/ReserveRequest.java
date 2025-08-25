@@ -2,6 +2,8 @@ package com.krittawat.groomingapi.controller.request;
 
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 public class ReserveRequest {
     private Long id;
@@ -11,8 +13,8 @@ public class ReserveRequest {
     private Long type;
     private Long breed;
     private Long grooming;
-    private String end; //"2025-04-24T09:00:00"
-    private String start; //"2025-04-24T09:00:00"
+    private LocalDateTime end;
+    private LocalDateTime start;
     private String note;
     private String color;
 }

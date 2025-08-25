@@ -9,11 +9,19 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.function.Supplier;
 
 import static com.krittawat.groomingapi.utils.Constants.DASH;
 
 public class UtilService {
+
+    private static final Locale LOCALE_TH = Locale.forLanguageTag("th-TH");
+    private static final DateTimeFormatter DAY_FORMATTER =
+            DateTimeFormatter.ofPattern("d MMMM", LOCALE_TH);
+    private static final DateTimeFormatter DAY_YEAR_FORMATTER =
+            DateTimeFormatter.ofPattern("d MMMM yyyy", LOCALE_TH);
+
     public static String trimOrNull(String value) {
         return StringUtils.hasText(value) ? value.trim() : null;
     }
@@ -135,6 +143,15 @@ public class UtilService {
         return value.format(formatter);
     }
 
+    public static String toStringFullThRange(LocalDateTime start, LocalDateTime end) {
+        if (start == null || end == null) return null;
+        if (start.getYear() == end.getYear()) {
+            return start.format(DAY_FORMATTER) + " - " + end.format(DAY_YEAR_FORMATTER);
+        } else {
+            return start.format(DAY_YEAR_FORMATTER) + " - " + end.format(DAY_YEAR_FORMATTER);
+        }
+    }
+
     public static int extractRequiredQuantity(String condition) {
         if (condition != null && condition.startsWith("BUY_")) {
             try {
@@ -159,4 +176,5 @@ public class UtilService {
         }
         return BigDecimal.ZERO;
     }
+
 }

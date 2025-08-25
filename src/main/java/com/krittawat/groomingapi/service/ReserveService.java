@@ -5,14 +5,15 @@ import com.krittawat.groomingapi.controller.response.ReserveGroomingResponse;
 import com.krittawat.groomingapi.controller.response.Response;
 import com.krittawat.groomingapi.datasource.entity.EGroomingReserve;
 import com.krittawat.groomingapi.datasource.entity.EPet;
-import com.krittawat.groomingapi.datasource.service.*;
+import com.krittawat.groomingapi.datasource.service.GroomingReserveService;
+import com.krittawat.groomingapi.datasource.service.PetBreedService;
+import com.krittawat.groomingapi.datasource.service.PetService;
+import com.krittawat.groomingapi.datasource.service.PetTypeService;
 import com.krittawat.groomingapi.error.DataNotFoundException;
 import com.krittawat.groomingapi.utils.EnumUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
@@ -33,8 +34,8 @@ public class ReserveService {
                         .map(item-> ReserveGroomingResponse.builder()
                                 .className(item.getColor())
                                 .title(EnumUtil.RESERVATION_TYPE.GROOMING.name())
-                                .start(item.getReserveDateStart().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
-                                .end(item.getReserveDateEnd().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+                                .start(item.getReserveDateStart())
+                                .end(item.getReserveDateEnd())
                                 .extendedProps(ReserveGroomingResponse.ExtendedProps.builder()
                                         .id(item.getId())
                                         .pet(item.getPet() != null ? item.getPet().getId() : null)
@@ -73,8 +74,8 @@ public class ReserveService {
         eGroomingReserve.setPhone(request.getPhone());
         eGroomingReserve.setColor(request.getColor());
         eGroomingReserve.setNote(request.getNote());
-        eGroomingReserve.setReserveDateStart(LocalDateTime.parse(request.getStart()));
-        eGroomingReserve.setReserveDateEnd(LocalDateTime.parse(request.getEnd()));
+        eGroomingReserve.setReserveDateStart(request.getStart());
+        eGroomingReserve.setReserveDateEnd(request.getEnd());
         eGroomingReserve = groomingReserveService.save(eGroomingReserve);
         return Response.builder()
                 .code(200)
@@ -82,8 +83,8 @@ public class ReserveService {
                 .data(ReserveGroomingResponse.builder()
                         .className(eGroomingReserve.getColor())
                         .title(EnumUtil.RESERVATION_TYPE.GROOMING.name())
-                        .start(eGroomingReserve.getReserveDateStart().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
-                        .end(eGroomingReserve.getReserveDateEnd().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+                        .start(eGroomingReserve.getReserveDateStart())
+                        .end(eGroomingReserve.getReserveDateEnd())
                         .extendedProps(ReserveGroomingResponse.ExtendedProps.builder()
                                 .id(eGroomingReserve.getId())
                                 .pet(eGroomingReserve.getPet() != null ? eGroomingReserve.getPet().getId() : null)
@@ -100,8 +101,8 @@ public class ReserveService {
 
     public Response updateReserveGrooming(ReserveRequest request) {
         EGroomingReserve eGroomingReserve = groomingReserveService.getById(request.getId());
-        eGroomingReserve.setReserveDateStart(LocalDateTime.parse(request.getStart()));
-        eGroomingReserve.setReserveDateEnd(LocalDateTime.parse(request.getEnd()));
+        eGroomingReserve.setReserveDateStart(request.getStart());
+        eGroomingReserve.setReserveDateEnd(request.getEnd());
         eGroomingReserve = groomingReserveService.save(eGroomingReserve);
         return Response.builder()
                 .code(200)
@@ -109,8 +110,8 @@ public class ReserveService {
                 .data(ReserveGroomingResponse.builder()
                         .className(eGroomingReserve.getColor())
                         .title(EnumUtil.RESERVATION_TYPE.GROOMING.name())
-                        .start(eGroomingReserve.getReserveDateStart().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
-                        .end(eGroomingReserve.getReserveDateEnd().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+                        .start(eGroomingReserve.getReserveDateStart())
+                        .end(eGroomingReserve.getReserveDateEnd())
                         .extendedProps(ReserveGroomingResponse.ExtendedProps.builder()
                                 .id(eGroomingReserve.getId())
                                 .pet(eGroomingReserve.getPet() != null ? eGroomingReserve.getPet().getId() : null)
