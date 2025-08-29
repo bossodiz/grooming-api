@@ -107,9 +107,16 @@ public class PaymentService {
 
 
     public Response getGroomingServices(Long petTypeId) throws DataNotFoundException {
-        List<EItem> list = itemsService.getGroomingServiceByPetType(petTypeId).stream()
-                .sorted(Comparator.comparing(EItem::getName))
-                .toList();
+        List<EItem> list;
+        if (petTypeId == 0){
+            list = itemsService.getGroomingService().stream()
+                    .sorted(Comparator.comparing(EItem::getName))
+                    .toList();
+        } else {
+            list = itemsService.getGroomingServiceByPetType(petTypeId).stream()
+                    .sorted(Comparator.comparing(EItem::getName))
+                    .toList();
+        }
         List<GroomingServiceResponse> response = list.stream()
                 .map(service -> GroomingServiceResponse.builder()
                         .id(service.getId())

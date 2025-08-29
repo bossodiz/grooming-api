@@ -2,10 +2,7 @@ package com.krittawat.groomingapi.datasource.service;
 
 import com.krittawat.groomingapi.datasource.entity.EItem;
 import com.krittawat.groomingapi.datasource.entity.EPetType;
-import com.krittawat.groomingapi.datasource.repository.ItemsRepository;
-import com.krittawat.groomingapi.datasource.repository.PetTypeRepository;
-import com.krittawat.groomingapi.datasource.repository.PromotionExcludedItemRepository;
-import com.krittawat.groomingapi.datasource.repository.PromotionIncludedItemRepository;
+import com.krittawat.groomingapi.datasource.repository.*;
 import com.krittawat.groomingapi.error.DataNotFoundException;
 import com.krittawat.groomingapi.utils.EnumUtil;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +17,7 @@ public class ItemsService {
     private final PetTypeRepository petTypeRepository;
     private final PromotionIncludedItemRepository promotionIncludedItemRepository;
     private final PromotionExcludedItemRepository promotionExcludedItemRepository;
+    private final PromotionFreeGiftItemRepository promotionFreeGiftItemRepository;
 
     public List<EItem> getGroomingService() {
         return itemsRepository.findAllByItemType(EnumUtil.ITEM_TYPE.GROOMING);
@@ -89,5 +87,13 @@ public class ItemsService {
 
     public List<EItem> getItemsByPromotionIdAndExclude(Long id) {
         return promotionExcludedItemRepository.findAllByPromotionId(id);
+    }
+
+    public List<EItem> getFreeByPromotionId(Long id) {
+        return promotionFreeGiftItemRepository.findAllByPromotionIdAndIsFree(id);
+    }
+
+    public List<EItem> getBoughtByPromotionId(Long id) {
+        return promotionFreeGiftItemRepository.findAllByPromotionIdAndIsBought(id);
     }
 }

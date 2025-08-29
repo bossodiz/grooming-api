@@ -4,8 +4,8 @@ import com.krittawat.groomingapi.controller.request.PromotionDetailRequest;
 import com.krittawat.groomingapi.controller.response.PromotionItem;
 import com.krittawat.groomingapi.controller.response.PromotionResponse;
 import com.krittawat.groomingapi.controller.response.Response;
-import com.krittawat.groomingapi.datasource.entity.EItem;
-import com.krittawat.groomingapi.datasource.entity.EPromotion;
+import com.krittawat.groomingapi.datasource.entity.*;
+import com.krittawat.groomingapi.datasource.repository.PromotionExcludedItemRepository;
 import com.krittawat.groomingapi.datasource.service.ItemsService;
 import com.krittawat.groomingapi.datasource.service.PromotionService;
 import com.krittawat.groomingapi.error.DataNotFoundException;
@@ -14,6 +14,7 @@ import com.krittawat.groomingapi.utils.EnumUtil;
 import com.krittawat.groomingapi.utils.UtilService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -29,6 +30,7 @@ public class PromotionDiscountService {
 
     private final PromotionService promotionService;
     private final ItemsService itemsService;
+    private final PromotionExcludedItemRepository excludedItemRepository;
 
     public Response getList() {
         List<EPromotion> list = promotionService.findAll();
@@ -187,12 +189,14 @@ public class PromotionDiscountService {
                 .build();
     }
 
+    @Transactional
     public Response updatePromotion(PromotionDetailRequest request) throws DataNotFoundException {
         EPromotion promotion = request.getPromotionId() != null ? promotionService.getById(request.getPromotionId()) : new EPromotion();
         promotion.setName(request.getPromotionDetail().getName());
         promotion.setDiscountCategory(EnumUtil.PROMOTION_TYPE.valueOf(request.getPromotionDetail().getDiscountCategory()));
         promotion.setDiscountType(request.getPromotionDetail().getDiscountType());
         promotion.setAmountType(request.getPromotionDetail().getAmountType());
+        promotion.setStatus(true);
         if (promotion.getDiscountType() == EnumUtil.DISCOUNT_TYPE.NORMAL) {
             promotion.setAmount(new BigDecimal(request.getPromotionDetail().getAmountNormal()));
             promotion.setConditionValue(null);
@@ -226,17 +230,122 @@ public class PromotionDiscountService {
             promotion.setSpecificDays(null);
         }
         promotion.setStatus(request.getPromotionDetail().getStatus());
+        promotion.setUpdatedAt(LocalDateTime.now());
         promotionService.save(promotion);
-//        if (request.getIncludeItems() != null) {
-//            itemsService.updatePromotionItems(id, request.getIncludeItems(), true);
-//        }
-//        if (request.getExcludeItems() != null) {
-//            itemsService.updatePromotionItems(id, request.getExcludeItems(), false);
-//        }
-
+        if (request.getPromotionDetail().getDiscountType() == EnumUtil.DISCOUNT_TYPE.FREE) {
+            promotionService.deleteIncluded(promotion.getId());
+            promotionService.deleteExcluded(promotion.getId());
+            if (request.getBought() == null || request.getBought().getItems().isEmpty()) {
+                throw new IllegalStateException("กรุณาเลือกสินค้าที่ต้องซื้ออย่างน้อย 1 รายการ");
+            }
+            if (request.getFree() == null || request.getFree().getItems().isEmpty()) {
+                throw new IllegalStateException("กรุณาเลือกสินค้าที่แถมอย่างน้อย 1 รายการ");
+            }
+            promotionService.deleteFreeItems(promotion.getId());
+            List<EPromotionFreeGiftItem> freeItems = new ArrayList<>();
+            for (Long boughtId : request.getBought().getItems()) {
+                for (Long freeId : request.getFree().getItems()) {
+                    EPromotionFreeGiftItem freeItem = new EPromotionFreeGiftItem();
+                    freeItem.setPromotionId(promotion.getId());
+                    freeItem.setBuyItemId(boughtId);
+                    freeItem.setFreeItemId(freeId);
+                    freeItems.add(freeItem);
+                }
+            }
+            promotionService.insertFreeItems(freeItems);
+        } else {
+            if (request.getIncluded() != null) {
+                List<EPromotionIncludedItem> includeItems = promotionService.getIncludedItems(request.getPromotionId());
+                if (request.getIncluded().isActive()) {
+                    promotionService.deleteFreeItems(promotion.getId());
+                    List<Long> itemIds = request.getIncluded().getItems().stream().toList();
+                    // ลบรายการที่ถูกลบออก
+                    for (EPromotionIncludedItem includeItem : includeItems) {
+                        if (!itemIds.contains(includeItem.getItemId())) {
+                            promotionService.deleteIncludedItem(includeItem);
+                        }
+                    }
+                    // เพิ่มรายการใหม่ที่เพิ่มเข้ามา
+                    for (Long itemId : itemIds) {
+                        boolean exists = promotionService.existsIncludedItem(promotion.getId(), itemId);
+                        if (!exists) {
+                            EPromotionIncludedItem newInclude = new EPromotionIncludedItem();
+                            newInclude.setPromotionId(promotion.getId());
+                            newInclude.setItemId(itemId);
+                            promotionService.insertIncludedItem(newInclude);
+                        }
+                    }
+                } else {
+                    promotionService.deleteIncluded(includeItems);
+                }
+            }
+            if (request.getExcluded() != null) {
+                List<EPromotionExcludedItem> excludedItems = promotionService.getExcludedItems(request.getPromotionId());
+                if (request.getExcluded().isActive()) {
+                    promotionService.deleteFreeItems(promotion.getId());
+                    List<Long> itemIds = request.getExcluded().getItems().stream().toList();
+                    // ลบรายการที่ถูกลบออก
+                    for (EPromotionExcludedItem excludedItem : excludedItems) {
+                        if (!itemIds.contains(excludedItem.getId())) {
+                            promotionService.deleteExcludedItem(excludedItem);
+                        }
+                    }
+                    // เพิ่มรายการใหม่ที่เพิ่มเข้ามา
+                    for (Long itemId : itemIds) {
+                        boolean exists = promotionService.existsExcludedItem(promotion.getId(), itemId);
+                        if (!exists) {
+                            EPromotionExcludedItem newExclude = new EPromotionExcludedItem();
+                            newExclude.setPromotionId(promotion.getId());
+                            newExclude.setItemId(itemId);
+                            promotionService.insertExcludedItem(newExclude);
+                        }
+                    }
+                } else {
+                    promotionService.deleteExcluded(excludedItems);
+                }
+            }
+        }
         return Response.builder()
                 .code(200)
-                .data("Update promotion success")
+                .data(promotion.getId())
                 .build();
     }
+
+
+    public Response getPromotionBoughtItems(Long id) {
+        List<EItem> items = itemsService.getBoughtByPromotionId(id);
+        List<PromotionItem> itemList = items.stream()
+                .map(item -> PromotionItem.builder()
+                        .id(item.getId())
+                        .name(item.getName())
+                        .description(item.getDescription())
+                        .price(UtilService.toString(item.getPrice(), 2))
+                        .build())
+                .distinct()
+                .toList();
+        return Response.builder()
+                .code(200)
+                .data(itemList)
+                .build();
+    }
+
+
+    public Response getPromotionFreeItems(Long id) {
+        List<EItem> items = itemsService.getFreeByPromotionId(id);
+        List<PromotionItem> itemList = items.stream()
+                .map(item -> PromotionItem.builder()
+                        .id(item.getId())
+                        .name(item.getName())
+                        .description(item.getDescription())
+                        .price(UtilService.toString(item.getPrice(), 2))
+                        .build())
+                .distinct()
+                .toList();
+        return Response.builder()
+                .code(200)
+                .data(itemList)
+                .build();
+    }
+
+
 }

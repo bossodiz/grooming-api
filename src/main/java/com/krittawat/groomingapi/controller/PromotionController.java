@@ -26,18 +26,28 @@ public class PromotionController {
     }
 
     @GetMapping("/items/{type}")
-    public Response getPromotionItems(@PathVariable("type") EnumUtil.ITEM_TYPE type) throws DataNotFoundException {
+    public Response getPromotionItems(@PathVariable("type") EnumUtil.ITEM_TYPE type) {
         return promotionDiscountService.getPromotionItems(type);
     }
 
     @GetMapping("{id}/include")
-    public Response getPromotionIncludeItems(@PathVariable("id") Long id) throws DataNotFoundException {
+    public Response getPromotionIncludeItems(@PathVariable("id") Long id) {
         return promotionDiscountService.getPromotionIncludeItems(id);
     }
 
     @GetMapping("{id}/exclude")
-    public Response getPromotionExcludeItems(@PathVariable("id") Long id) throws DataNotFoundException {
+    public Response getPromotionExcludeItems(@PathVariable("id") Long id) {
         return promotionDiscountService.getPromotionExcludeItems(id);
+    }
+
+    @GetMapping("{id}/bought")
+    public Response getPromotionBoughtItems(@PathVariable("id") Long id) {
+        return promotionDiscountService.getPromotionBoughtItems(id);
+    }
+
+    @GetMapping("{id}/free")
+    public Response getPromotionFreeItems(@PathVariable("id") Long id) {
+        return promotionDiscountService.getPromotionFreeItems(id);
     }
 
     @PutMapping("/update")

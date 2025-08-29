@@ -4,12 +4,8 @@ import com.krittawat.groomingapi.controller.response.AppliedPromotionResponse;
 import com.krittawat.groomingapi.controller.response.CartCalculationResultResponse;
 import com.krittawat.groomingapi.controller.response.CartItemResponse;
 import com.krittawat.groomingapi.controller.response.FreeGiftResponse;
-import com.krittawat.groomingapi.datasource.entity.EItem;
-import com.krittawat.groomingapi.datasource.entity.EPromotion;
-import com.krittawat.groomingapi.datasource.entity.EPromotionFreeGiftItem;
-import com.krittawat.groomingapi.datasource.repository.ItemsRepository;
-import com.krittawat.groomingapi.datasource.repository.PromotionFreeGiftItemRepository;
-import com.krittawat.groomingapi.datasource.repository.PromotionRepository;
+import com.krittawat.groomingapi.datasource.entity.*;
+import com.krittawat.groomingapi.datasource.repository.*;
 import com.krittawat.groomingapi.error.DataNotFoundException;
 import com.krittawat.groomingapi.utils.EnumUtil;
 import jakarta.transaction.Transactional;
@@ -27,6 +23,8 @@ public class PromotionService {
     private final PromotionRepository promotionRepository;
     private final PromotionFreeGiftItemRepository promotionFreeGiftItemRepository;
     private final ItemsRepository itemsRepository;
+    private final PromotionExcludedItemRepository excludedItemRepository;
+    private final PromotionIncludedItemRepository includedItemRepository;
 
     public List<EPromotion> findAll() {
         return promotionRepository.findAll();
@@ -127,5 +125,61 @@ public class PromotionService {
 
     public void save(EPromotion promotion) {
         promotionRepository.save(promotion);
+    }
+
+    public List<EPromotionIncludedItem> getIncludedItems(Long promoId) {
+        return includedItemRepository.findItemsByPromotionId(promoId);
+    }
+
+    public List<EPromotionExcludedItem> getExcludedItems(Long promoId) {
+        return excludedItemRepository.findItemsByPromotionId(promoId);
+    }
+
+    public void deleteIncludedItem(EPromotionIncludedItem includeItem) {
+        includedItemRepository.delete(includeItem);
+    }
+
+    public boolean existsIncludedItem(Long id, Long itemId) {
+        return includedItemRepository.existsByPromotionIdAndItemId(id, itemId);
+    }
+
+    public void insertIncludedItem(EPromotionIncludedItem newInclude) {
+        includedItemRepository.save(newInclude);
+    }
+
+    public void deleteExcludedItem(EPromotionExcludedItem excludedItem) {
+        excludedItemRepository.delete(excludedItem);
+    }
+
+    public boolean existsExcludedItem(Long id, Long itemId) {
+        return excludedItemRepository.existsByPromotionIdAndItemId(id, itemId);
+    }
+
+    public void insertExcludedItem(EPromotionExcludedItem newExclude) {
+        excludedItemRepository.save(newExclude);
+    }
+
+    public void deleteIncluded(List<EPromotionIncludedItem> item) {
+        includedItemRepository.deleteAll(item);
+    }
+
+    public void deleteExcluded(List<EPromotionExcludedItem> item) {
+        excludedItemRepository.deleteAll(item);
+    }
+
+    public void deleteIncluded(Long promotionId) {
+        includedItemRepository.deleteByPromotionId(promotionId);
+    }
+
+    public void deleteExcluded(Long promotionId) {
+        excludedItemRepository.deleteByPromotionId(promotionId);
+    }
+
+    public void deleteFreeItems(Long id) {
+        promotionFreeGiftItemRepository.deleteByPromotionId(id);
+    }
+
+    public void insertFreeItems(List<EPromotionFreeGiftItem> freeItems) {
+        promotionFreeGiftItemRepository.saveAll(freeItems);
     }
 }

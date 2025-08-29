@@ -12,4 +12,6 @@ public class PromotionDetailRequest {
     private PromotionDetail promotionDetail;
     private PromotionItemWrapper included;
     private PromotionItemWrapper excluded;
+    private PromotionItemWrapper bought;
+    private PromotionItemWrapper free;
 }

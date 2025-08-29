@@ -5,6 +5,7 @@ import com.krittawat.groomingapi.datasource.repository.GroomingReserveRepository
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -17,8 +18,8 @@ public class GroomingReserveService {
         return groomingReserveRepository.findById(id).orElse(null);
     }
 
-    public List<EGroomingReserve> getAll() {
-        return groomingReserveRepository.findAll();
+    public List<EGroomingReserve> getByStartEnd(LocalDateTime start, LocalDateTime end) {
+        return groomingReserveRepository.findAllByReserveDateStartBetween(start, end);
     }
 
     public EGroomingReserve save(EGroomingReserve eGroomingReserve) {

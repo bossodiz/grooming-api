@@ -14,8 +14,9 @@ public class ReserveController {
     private final ReserveService reserveService;
 
     @GetMapping("/grooming")
-    public Response grooming() {
-        return reserveService.getReserveGrooming();
+    public Response grooming(@RequestParam(name = "start" , required = false) String start,
+                             @RequestParam(name = "end", required = false) String end) {
+        return reserveService.getReserveGrooming(start, end);
     }
 
     @PostMapping("/grooming")

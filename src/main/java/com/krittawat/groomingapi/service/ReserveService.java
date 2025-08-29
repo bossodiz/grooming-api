@@ -14,6 +14,7 @@ import com.krittawat.groomingapi.utils.EnumUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -25,8 +26,10 @@ public class ReserveService {
     private final PetTypeService petTypeService;
     private final PetBreedService petBreedService;
 
-    public Response getReserveGrooming() {
-        List<EGroomingReserve> list = groomingReserveService.getAll();
+    public Response getReserveGrooming(String start, String end) {
+        LocalDateTime startDateTime = start != null ? LocalDateTime.parse(start) : LocalDateTime.now().minusMonths(1);
+        LocalDateTime endDateTime = end != null ? LocalDateTime.parse(end) : LocalDateTime.now().plusMonths(1);
+        List<EGroomingReserve> list = groomingReserveService.getByStartEnd(startDateTime, endDateTime);
         return Response.builder()
                 .code(200)
                 .message("OK")
@@ -39,7 +42,7 @@ public class ReserveService {
                                 .extendedProps(ReserveGroomingResponse.ExtendedProps.builder()
                                         .id(item.getId())
                                         .pet(item.getPet() != null ? item.getPet().getId() : null)
-                                        .petName(item.getPet() != null ? item.getPet().getName() : item.getPetName() != null ? item.getPetName() : null)
+                                        .petName(item.getPet() != null ? item.getPet().getName() : item.getPetName())
                                         .phone(item.getPhone())
                                         .petType(item.getPetType() != null ? item.getPetType().getId() : null)
                                         .petBreed(item.getPetBreed() != null ? item.getPetBreed().getId() : null)
@@ -88,7 +91,7 @@ public class ReserveService {
                         .extendedProps(ReserveGroomingResponse.ExtendedProps.builder()
                                 .id(eGroomingReserve.getId())
                                 .pet(eGroomingReserve.getPet() != null ? eGroomingReserve.getPet().getId() : null)
-                                .petName(eGroomingReserve.getPet() != null ? eGroomingReserve.getPet().getName() : eGroomingReserve.getPetName() != null ? eGroomingReserve.getPetName() : null)
+                                .petName(eGroomingReserve.getPet() != null ? eGroomingReserve.getPet().getName() : eGroomingReserve.getPetName())
                                 .phone(eGroomingReserve.getPhone())
                                 .petType(eGroomingReserve.getPetType() != null ? eGroomingReserve.getPetType().getId() : null)
                                 .petBreed(eGroomingReserve.getPetBreed() != null ? eGroomingReserve.getPetBreed().getId() : null)
@@ -115,7 +118,7 @@ public class ReserveService {
                         .extendedProps(ReserveGroomingResponse.ExtendedProps.builder()
                                 .id(eGroomingReserve.getId())
                                 .pet(eGroomingReserve.getPet() != null ? eGroomingReserve.getPet().getId() : null)
-                                .petName(eGroomingReserve.getPet() != null ? eGroomingReserve.getPet().getName() : eGroomingReserve.getPetName() != null ? eGroomingReserve.getPetName() : null)
+                                .petName(eGroomingReserve.getPet() != null ? eGroomingReserve.getPet().getName() : eGroomingReserve.getPetName())
                                 .phone(eGroomingReserve.getPhone())
                                 .petType(eGroomingReserve.getPetType() != null ? eGroomingReserve.getPetType().getId() : null)
                                 .petBreed(eGroomingReserve.getPetBreed() != null ? eGroomingReserve.getPetBreed().getId() : null)

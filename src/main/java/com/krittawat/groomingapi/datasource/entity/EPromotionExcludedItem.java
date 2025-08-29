@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @Setter
@@ -24,7 +26,5 @@ public class EPromotionExcludedItem {
     private Long itemId;
     @CreationTimestamp
     @Column(name = "created_at")
-    private String createdAt;
-    @Column(name = "status")
-    private Boolean status;
+    private LocalDateTime createdAt;
 }
