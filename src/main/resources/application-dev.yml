@@ -3,24 +3,10 @@ spring:
     url: jdbc:mysql://localhost:3306/dev?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Bangkok
     username: admin
     password: 1234
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    hikari:
-      maximum-pool-size: 10
 
-  jpa:
-    hibernate:
-      ddl-auto: update    # สะดวกตอน dev
-    show-sql: true
-
-logging:
-  level:
-    root: DEBUG
-
-# !!! แนะนำมาก: อย่า hardcode ความลับในไฟล์
-# ให้เปลี่ยนเป็นอ่านจาก ENV (ด้านล่างมีตัวอย่าง)
 jwt:
-  secret-key: ${JWT_SECRET:CHANGE_ME_FOR_DEV_ONLY}
-  expiration: 86400000   # 1 วัน (ms)
+  secret-key: 1234567890
+  expiration: 86400000
 
 payment:
   promptpay:

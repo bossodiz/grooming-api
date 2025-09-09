@@ -1,17 +1,20 @@
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/dev?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Bangkok
-    username: admin
-    password: 1234
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       maximum-pool-size: 10
 
   jpa:
     hibernate:
-      ddl-auto: update    # สะดวกตอน dev
+      ddl-auto: none    # สะดวกตอน dev
     show-sql: true
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+        
 logging:
   level:
     root: DEBUG
@@ -26,3 +29,4 @@ payment:
   promptpay:
     receiverPhone: "0818092589"
     expiresSeconds: 300
+

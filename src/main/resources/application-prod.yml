@@ -1,16 +1,18 @@
 spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/dev?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Bangkok}
+    username: ${SPRING_DATASOURCE_USERNAME:admin}
+    password: ${SPRING_DATASOURCE_PASSWORD:1234}
   jpa:
     show-sql: false
     hibernate:
-      ddl-auto: validate   # ปลอดภัยกว่า ไม่แก้สคีมาอัตโนมัติใน prod
+      ddl-auto: validate
+  logging:
+    level:
+      root: INFO
 
-logging:
-  level:
-    root: INFO
-
-# ความลับ: อ่านจาก ENV ในเครื่องจริง
 jwt:
-  secret-key: ${JWT_SECRET:PLEASE_SET_IN_ENV_FOR_PROD}
+  secret-key: ${JWT_SECRET:1234567890}
   expiration: 86400000
 
 payment:
