@@ -2,13 +2,15 @@
 FROM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /workspace
 
+# cache dependencies ก่อน จะได้บิลด์รอบต่อไปไว
 COPY pom.xml .
 RUN mvn -B -q -f pom.xml dependency:go-offline
 
+# คัดลอกซอร์สแล้ว build
 COPY src ./src
 RUN mvn -B -q -f pom.xml clean package -DskipTests
 
-# ---- Run stage: JRE 21 ----
+# ---- Run stage: JRE 21 บางเบา ----
 FROM eclipse-temurin:21-jre
 WORKDIR /app
 COPY --from=build /workspace/target/*.jar /app/app.jar
