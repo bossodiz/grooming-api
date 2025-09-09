@@ -1,4 +1,7 @@
-CREATE TABLE `grooming_reserve` (
+SET NAMES utf8mb4;
+SET time_zone = '+07:00';
+
+CREATE TABLE IF NOT EXISTS `grooming_reserve` (
                                     `id` bigint NOT NULL AUTO_INCREMENT,
                                     `pet_id` bigint DEFAULT NULL,
                                     `pet_name` varchar(100)  DEFAULT NULL,
@@ -14,7 +17,7 @@ CREATE TABLE `grooming_reserve` (
 );
 
 
-CREATE TABLE `invoice` (
+CREATE TABLE IF NOT EXISTS `invoice` (
                            `id` bigint NOT NULL AUTO_INCREMENT,
                            `invoice_no` varchar(18)  NOT NULL COMMENT 'YYYYMMDDHHmmss(userid4digit)',
                            `customer_id` bigint DEFAULT NULL COMMENT 'user_id',
@@ -31,7 +34,7 @@ CREATE TABLE `invoice` (
 );
 
 
-CREATE TABLE `invoice_session` (
+CREATE TABLE IF NOT EXISTS `invoice_session` (
                                    `id` bigint NOT NULL AUTO_INCREMENT,
                                    `invoice_no` varchar(18)  NOT NULL,
                                    `cart_hash` varchar(128) DEFAULT NULL,
@@ -46,7 +49,7 @@ CREATE TABLE `invoice_session` (
 );
 
 
-CREATE TABLE `item` (
+CREATE TABLE IF NOT EXISTS `item` (
                         `id` bigint NOT NULL AUTO_INCREMENT,
                         `name` varchar(1000) NOT NULL,
                         `description` varchar(1000) DEFAULT NULL,
@@ -61,7 +64,7 @@ CREATE TABLE `item` (
 );
 
 
-CREATE TABLE `item_tag` (
+CREATE TABLE IF NOT EXISTS `item_tag` (
                             `id` bigint NOT NULL AUTO_INCREMENT,
                             `item_id` bigint NOT NULL,
                             `tag_id` bigint NOT NULL,
@@ -73,7 +76,7 @@ CREATE TABLE `item_tag` (
 );
 
 
-CREATE TABLE `order` (
+CREATE TABLE IF NOT EXISTS `order` (
                          `id` bigint NOT NULL AUTO_INCREMENT,
                          `invoice_id` bigint DEFAULT NULL,
                          `customer_id` bigint DEFAULT NULL,
@@ -94,7 +97,7 @@ CREATE TABLE `order` (
 );
 
 
-CREATE TABLE `pet` (
+CREATE TABLE IF NOT EXISTS `pet` (
                        `id` bigint NOT NULL AUTO_INCREMENT,
                        `name` varchar(100) NOT NULL,
                        `age_year` int DEFAULT NULL,
@@ -117,7 +120,7 @@ CREATE TABLE `pet` (
 );
 
 
-CREATE TABLE `pet_breed` (
+CREATE TABLE IF NOT EXISTS `pet_breed` (
                              `id` bigint NOT NULL AUTO_INCREMENT,
                              `name` varchar(100) NOT NULL,
                              `name_th` varchar(100) DEFAULT NULL,
@@ -131,7 +134,7 @@ CREATE TABLE `pet_breed` (
 );
 
 
-CREATE TABLE `pet_type` (
+CREATE TABLE IF NOT EXISTS `pet_type` (
                             `id` bigint NOT NULL AUTO_INCREMENT,
                             `name` varchar(100) NOT NULL,
                             `name_th` varchar(100) DEFAULT NULL,
@@ -141,7 +144,7 @@ CREATE TABLE `pet_type` (
 );
 
 
-CREATE TABLE `promotion` (
+CREATE TABLE IF NOT EXISTS `promotion` (
                              `id` bigint NOT NULL AUTO_INCREMENT,
                              `name` varchar(500) DEFAULT NULL,
                              `discount_category` varchar(100) DEFAULT NULL,
@@ -162,7 +165,7 @@ CREATE TABLE `promotion` (
 );
 
 
-CREATE TABLE `promotion_excluded_item` (
+CREATE TABLE IF NOT EXISTS `promotion_excluded_item` (
                                            `id` bigint NOT NULL AUTO_INCREMENT,
                                            `promotion_id` bigint NOT NULL,
                                            `item_id` bigint NOT NULL,
@@ -175,7 +178,7 @@ CREATE TABLE `promotion_excluded_item` (
 );
 
 
-CREATE TABLE `promotion_free_gift_item` (
+CREATE TABLE IF NOT EXISTS `promotion_free_gift_item` (
                                             `id` bigint NOT NULL AUTO_INCREMENT,
                                             `promotion_id` bigint NOT NULL,
                                             `buy_item_id` bigint NOT NULL,
@@ -187,7 +190,7 @@ CREATE TABLE `promotion_free_gift_item` (
 );
 
 
-CREATE TABLE `promotion_included_item` (
+CREATE TABLE IF NOT EXISTS `promotion_included_item` (
                                            `id` bigint NOT NULL AUTO_INCREMENT,
                                            `promotion_id` bigint NOT NULL,
                                            `item_id` bigint NOT NULL,
@@ -200,7 +203,7 @@ CREATE TABLE `promotion_included_item` (
 );
 
 
-CREATE TABLE `role` (
+CREATE TABLE IF NOT EXISTS `role` (
                         `id` bigint NOT NULL AUTO_INCREMENT,
                         `name` varchar(100) NOT NULL,
                         `description` varchar(500) DEFAULT NULL,
@@ -209,7 +212,7 @@ CREATE TABLE `role` (
 );
 
 
-CREATE TABLE `tag` (
+CREATE TABLE IF NOT EXISTS `tag` (
                        `id` bigint NOT NULL AUTO_INCREMENT,
                        `name` varchar(100)  NOT NULL,
                        PRIMARY KEY (`id`),
@@ -217,7 +220,7 @@ CREATE TABLE `tag` (
 );
 
 
-CREATE TABLE `user` (
+CREATE TABLE IF NOT EXISTS `user` (
                         `id` bigint NOT NULL AUTO_INCREMENT,
                         `username` varchar(100) NOT NULL,
                         `password` varchar(100) NOT NULL,
