@@ -6,7 +6,7 @@ import com.krittawat.groomingapi.controller.response.Response;
 import com.krittawat.groomingapi.datasource.entity.EPet;
 import com.krittawat.groomingapi.datasource.entity.EPetBreed;
 import com.krittawat.groomingapi.datasource.entity.EPetType;
-import com.krittawat.groomingapi.datasource.entity.EUser;
+import com.krittawat.groomingapi.datasource.entity.EUserProfile;
 import com.krittawat.groomingapi.datasource.service.PetService;
 import com.krittawat.groomingapi.datasource.service.UserService;
 import com.krittawat.groomingapi.error.DataNotFoundException;
@@ -25,7 +25,7 @@ public class PetsService {
     private final UserService userService;
 
     public Response add(PetRequest request) throws DataNotFoundException {
-        EUser user = userService.findByCustomersId(request.getCustomerId());
+        EUserProfile user = userService.findByCustomersId(request.getCustomerId());
         List<EPet> pets = petService.findByUserAndName(user, request.getName());
         if (!pets.isEmpty()){
             throw new DataNotFoundException("Pet already exist");

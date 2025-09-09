@@ -3,7 +3,7 @@ package com.krittawat.groomingapi.datasource.service;
 import com.krittawat.groomingapi.datasource.entity.EPet;
 import com.krittawat.groomingapi.datasource.entity.EPetBreed;
 import com.krittawat.groomingapi.datasource.entity.EPetType;
-import com.krittawat.groomingapi.datasource.entity.EUser;
+import com.krittawat.groomingapi.datasource.entity.EUserProfile;
 import com.krittawat.groomingapi.datasource.repository.PetBreedRepository;
 import com.krittawat.groomingapi.datasource.repository.PetRepository;
 import com.krittawat.groomingapi.datasource.repository.PetTypeRepository;
@@ -20,11 +20,11 @@ public class PetService {
     private final PetBreedRepository petBreedRepository;
     private final PetTypeRepository petTypeRepository;
 
-    public List<EPet> findByUser(EUser user) {
+    public List<EPet> findByUser(EUserProfile user) {
         return petRepository.findByUser(user);
     }
 
-    public List<EPet> findByUserAndName(EUser user, String name) {
+    public List<EPet> findByUserAndName(EUserProfile user, String name) {
         return petRepository.findByUserAndName(user, name);
     }
 

@@ -25,7 +25,7 @@ public class EInvoice implements java.io.Serializable {
     private String invoiceNo;
     @ManyToOne
     @JoinColumn(name = "customer_id", referencedColumnName = "id")
-    private EUser customer;
+    private EUserProfile customer;
     @Column(name = "price")
     private BigDecimal price;
     @Column(name = "payment_type")

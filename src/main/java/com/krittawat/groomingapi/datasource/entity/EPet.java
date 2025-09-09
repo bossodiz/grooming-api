@@ -41,7 +41,7 @@ public class EPet implements java.io.Serializable {
     private BigDecimal weight;
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
-    private EUser user;
+    private EUserProfile user;
     @CreationTimestamp
     @Column(name = "created_date")
     private LocalDateTime createdDate;

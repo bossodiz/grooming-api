@@ -1,7 +1,7 @@
 package com.krittawat.groomingapi.datasource.repository;
 
 import com.krittawat.groomingapi.datasource.entity.ERole;
-import com.krittawat.groomingapi.datasource.entity.EUser;
+import com.krittawat.groomingapi.datasource.entity.EUserProfile;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -10,14 +10,14 @@ import java.util.Optional;
 
 
 @Repository
-public interface UserRepository extends JpaRepository<EUser, Long> {
-    Optional<EUser> findByUsername(String username);
+public interface UserRepository extends JpaRepository<EUserProfile, Long> {
+    Optional<EUserProfile> findByUsername(String username);
 
-    Optional<EUser> findByid(Long id);
+    Optional<EUserProfile> findByid(Long id);
 
     boolean existsByUsername(String username);
 
-    List<EUser> findByRole(ERole role);
+    List<EUserProfile> findByRole(ERole role);
 
-    Optional<EUser> findByUsernameAndIdNot(String username, Long id);
+    Optional<EUserProfile> findByUsernameAndIdNot(String username, Long id);
 }
