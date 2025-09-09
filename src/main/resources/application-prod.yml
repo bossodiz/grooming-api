@@ -15,6 +15,10 @@ spring:
       properties:
         hibernate:
           jdbc.time_zone: Asia/Bangkok
+    flyway:
+      enabled: true
+      locations: classpath:db/migration
+      baseline-on-migrate: true
 jwt:
   secret-key: NkQyYzNsbmQxNTJhZTJwZ2p2ZGZ5bjRkdmkwb0x6W0xFSF5Gb+OXy7hOjz7hGjmI==
   expiration: 86400000 # 1 วัน (มิลลิวินาที)
