@@ -5,7 +5,7 @@ import com.krittawat.groomingapi.controller.request.RefreshTokenRequest;
 import com.krittawat.groomingapi.controller.request.RegisterRequest;
 import com.krittawat.groomingapi.controller.response.AuthResponse;
 import com.krittawat.groomingapi.controller.response.Response;
-import com.krittawat.groomingapi.datasource.entity.EUser;
+import com.krittawat.groomingapi.datasource.entity.EUserProfile;
 import com.krittawat.groomingapi.datasource.service.RoleService;
 import com.krittawat.groomingapi.datasource.service.UserService;
 import com.krittawat.groomingapi.error.BadRequestException;
@@ -34,7 +34,7 @@ public class AuthService {
 
     public AuthResponse login(LoginRequest request) throws BadRequestException {
         try{
-            EUser user = userService.findByUsername(request.getUsername().trim());
+            EUserProfile user = userService.findByUsername(request.getUsername().trim());
             if (!passwordEncoder.matches(request.getPassword().trim(), user.getPassword())) {
                 throw new BadRequestException("Invalid username or password");
             }
@@ -70,7 +70,7 @@ public class AuthService {
         if (userService.existsByUsername(request.getUsername().trim())) {
             throw new BadRequestException("Username is already taken");
         }
-        EUser user = new EUser();
+        EUserProfile user = new EUserProfile();
         user.setUsername(UtilService.trimOrNull(request.getUsername()));
         user.setPassword(passwordEncoder.encode(UtilService.trimOrNull(request.getPassword())));
         user.setFirstname(UtilService.trimOrNull(request.getFirstname()));
@@ -93,7 +93,7 @@ public class AuthService {
             throw new UnauthorizedException("Refresh Token is expired");
         }
         String username = jwtUtilService.extractUsername(request.getRefreshToken());
-        EUser user = userService.findByUsername(username);
+        EUserProfile user = userService.findByUsername(username);
         return AuthResponse.builder()
                 .token(jwtUtilService.generateToken(username))
                 .refreshToken(jwtUtilService.generateRefreshToken(username))

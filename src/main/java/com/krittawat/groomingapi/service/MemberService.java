@@ -6,7 +6,7 @@ import com.krittawat.groomingapi.controller.response.CustomerResponse;
 import com.krittawat.groomingapi.controller.response.PetResponse;
 import com.krittawat.groomingapi.controller.response.Response;
 import com.krittawat.groomingapi.datasource.entity.EPet;
-import com.krittawat.groomingapi.datasource.entity.EUser;
+import com.krittawat.groomingapi.datasource.entity.EUserProfile;
 import com.krittawat.groomingapi.datasource.service.PetService;
 import com.krittawat.groomingapi.datasource.service.RoleService;
 import com.krittawat.groomingapi.datasource.service.UserService;
@@ -30,7 +30,7 @@ public class MemberService {
     public Response register(RegisterRequest request) throws DataNotFoundException {
         String a = "";
         if (userService.existsByUsername(request.getUsername().trim())) {
-            EUser user = userService.findByUsername(request.getUsername().trim());
+            EUserProfile user = userService.findByUsername(request.getUsername().trim());
             return Response.builder()
                     .code(200)
                     .message("Phone is already taken")
@@ -44,7 +44,7 @@ public class MemberService {
                             .build())
                     .build();
         }
-        EUser user = new EUser();
+        EUserProfile user = new EUserProfile();
         user.setUsername(UtilService.trimOrNull(request.getUsername()));
         user.setPassword("");
         user.setFirstname(UtilService.trimOrNull(request.getFirstname()));
@@ -71,7 +71,7 @@ public class MemberService {
     }
 
     public Response getCustomers() throws DataNotFoundException {
-        List<EUser> list = userService.findByCustomers();
+        List<EUserProfile> list = userService.findByCustomers();
         return Response.builder()
                 .code(200)
                 .message("Customers found")
@@ -97,7 +97,7 @@ public class MemberService {
     }
 
     public Response getCustomersById(Long id) throws DataNotFoundException {
-        EUser user = userService.findByCustomersId(id);
+        EUserProfile user = userService.findByCustomersId(id);
         List<EPet> pets = petService.findByUser(user);
         return Response.builder()
                 .code(200)
@@ -123,7 +123,7 @@ public class MemberService {
     }
 
     public Response updateCustomersById(Long id, CustomerRequest request) throws DataNotFoundException {
-        EUser user = userService.findByCustomersId(id);
+        EUserProfile user = userService.findByCustomersId(id);
         if (userService.existsByUsernameNotId(id, request.getPhone())){
             return Response.builder()
                     .code(400)
@@ -155,7 +155,7 @@ public class MemberService {
     }
 
     public Response updateCustomersRemarkById(Long id, CustomerRequest request) throws DataNotFoundException {
-        EUser user = userService.findByCustomersId(id);
+        EUserProfile user = userService.findByCustomersId(id);
         user.setRemark(UtilService.trimOrNull(request.getRemark()));
         user = userService.save(user);
         return Response.builder()
@@ -168,7 +168,7 @@ public class MemberService {
     }
 
     public Response getCustomersRemarkById(Long id) throws DataNotFoundException {
-        EUser user = userService.findByCustomersId(id);
+        EUserProfile user = userService.findByCustomersId(id);
         return Response.builder()
                 .code(200)
                 .message("Customers found")
@@ -180,7 +180,7 @@ public class MemberService {
     }
 
     public Response getPetsByCustomerId(Long id) throws DataNotFoundException {
-        EUser user = userService.findByCustomersId(id);
+        EUserProfile user = userService.findByCustomersId(id);
         List<EPet> pets = petService.findByUser(user);
         return Response.builder()
                 .code(200)

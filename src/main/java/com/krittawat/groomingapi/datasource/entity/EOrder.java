@@ -25,7 +25,7 @@ public class EOrder {
     private EInvoice invoice;
     @ManyToOne
     @JoinColumn(name = "customer_id", referencedColumnName = "id")
-    private EUser customer;
+    private EUserProfile customer;
     @ManyToOne
     @JoinColumn(name = "pet_id", referencedColumnName = "id")
     private EPet pet;
