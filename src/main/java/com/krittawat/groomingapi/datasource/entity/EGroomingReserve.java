@@ -38,7 +38,7 @@ public class EGroomingReserve implements java.io.Serializable {
     private LocalDateTime reserveDateEnd;
     @CreationTimestamp
     @Column(name = "created_date")
-    private String createdDate;
+    private LocalDateTime createdDate;
     @Column(name = "color")
     private String color;
     @Column(name = "note")

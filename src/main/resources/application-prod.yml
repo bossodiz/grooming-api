@@ -6,10 +6,7 @@ spring:
   jpa:
     show-sql: false
     hibernate:
-      ddl-auto: validate
-  logging:
-    level:
-      root: INFO
+      ddl-auto: none
 
 jwt:
   secret-key: ${JWT_SECRET:1234567890}
