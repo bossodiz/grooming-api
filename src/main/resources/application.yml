@@ -9,3 +9,24 @@ spring:
       ddl-auto: none    # สะดวกตอน dev
     show-sql: true
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+        
+logging:
+  level:
+    root: DEBUG
+
+# !!! แนะนำมาก: อย่า hardcode ความลับในไฟล์
+# ให้เปลี่ยนเป็นอ่านจาก ENV (ด้านล่างมีตัวอย่าง)
+jwt:
+  secret-key: ${JWT_SECRET:CHANGE_ME_FOR_DEV_ONLY}
+  expiration: 86400000   # 1 วัน (ms)
+
+payment:
+  promptpay:
+    receiverPhone: "0818092589"
+    expiresSeconds: 300
+
