@@ -3,14 +3,16 @@ package com.krittawat.groomingapi.controller.response;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 @Builder
 public class ReserveGroomingResponse {
 
     private String className;
     private String title;
-    private String start;
-    private String end;
+    private LocalDateTime start;
+    private LocalDateTime end;
     private ExtendedProps extendedProps;
 
     @Data
@@ -22,8 +24,6 @@ public class ReserveGroomingResponse {
         private String phone;
         private Long petType;
         private Long petBreed;
-        private Long serviceId;
-        private String serviceName;
         private String note;
     }
 }

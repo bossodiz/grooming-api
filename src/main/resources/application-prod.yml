@@ -2,16 +2,28 @@ spring:
   jackson:
     time-zone: Asia/Bangkok
   datasource:
-    url: jdbc:mysql://root:PvDhNGQhBHMdbSDGOuUfUiTQjMFLQPOX@shuttle.proxy.rlwy.net:22978/railway
-    username: root
-    password: PvDhNGQhBHMdbSDGOuUfUiTQjMFLQPOX
-    driver-class-name: com.mysql.jdbc.Driver
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       maximum-pool-size: 10
     jpa:
       hibernate:
-        ddl-auto: update
+        ddl-auto: validate
       show-sql: false
+      properties:
+        hibernate:
+          jdbc.time_zone: Asia/Bangkok
+    flyway:
+      enabled: true
+      locations: classpath:db/migration
+      baseline-on-migrate: true
 jwt:
   secret-key: NkQyYzNsbmQxNTJhZTJwZ2p2ZGZ5bjRkdmkwb0x6W0xFSF5Gb+OXy7hOjz7hGjmI==
   expiration: 86400000 # 1 วัน (มิลลิวินาที)
+
+payment:
+  promptpay:
+    receiverPhone: "0812345678"   # หรือคอมเมนต์บรรทัดนี้ถ้าใช้ National ID
+    expiresSeconds: 180           # เวลาให้ลูกค้าสแกน (วินาที)

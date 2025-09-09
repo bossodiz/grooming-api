@@ -58,41 +58,48 @@ public class PetsService {
 
     public Response getPets() {
         List<EPet> list = petService.findAll();
+        List<PetResponse> pets = list.stream()
+            .map(pet -> {
+                EPet.Age age = pet.computeCurrentAge();
+                return PetResponse.builder()
+                    .id(pet.getId())
+                    .name(pet.getName())
+                    .ageYear(age.years())
+                    .ageMonth(age.months())
+                    .gender(UtilService.getEnum(pet.getGender()))
+                    .genderTh(UtilService.getNameThDefaulterDash(pet.getGender()))
+                    .genderEn(UtilService.getNameEnDefaulterDash(pet.getGender()))
+                    .breedNameTh(UtilService.getNameThDefaulterDash(pet::getPetBreed))
+                    .breedNameEn(UtilService.getNameEnDefaulterDash(pet::getPetBreed))
+                    .typeNameTh(UtilService.getNameThDefaulterDash(pet::getPetType))
+                    .typeNameEn(UtilService.getNameEnDefaulterDash(pet::getPetType))
+                    .breedId(pet.getBreedId())
+                    .typeId(pet.getTypeId())
+                    .weight(UtilService.toStringDefaulterDash(pet.getWeight()))
+                    .service(UtilService.toStringDefaulterZero(pet.getServiceCount()))
+                    .build();
+            })
+            .toList();
         return Response.builder()
                 .code(200)
                 .message("pets found")
-                .data(list.stream().map(pet -> PetResponse.builder()
-                                .id(pet.getId())
-                                .name(pet.getName())
-                                .ageYear(pet.getAgeYear())
-                                .ageMonth(pet.getAgeMonth())
-                                .gender(UtilService.getEnum(pet.getGender()))
-                                .genderTh(UtilService.getNameThDefaulterDash(pet.getGender()))
-                                .genderEn(UtilService.getNameEnDefaulterDash(pet.getGender()))
-                                .breedNameTh(UtilService.getNameThDefaulterDash(pet::getPetBreed))
-                                .breedNameEn(UtilService.getNameEnDefaulterDash(pet::getPetBreed))
-                                .typeNameTh(UtilService.getNameThDefaulterDash(pet::getPetType))
-                                .typeNameEn(UtilService.getNameEnDefaulterDash(pet::getPetType))
-                                .breedId(pet.getBreedId())
-                                .typeId(pet.getTypeId())
-                                .weight(UtilService.toStringDefaulterDash(pet.getWeight()))
-                                .service(UtilService.toStringDefaulterZero(pet.getServiceCount()))
-                                .build()))
+                .data(pets)
                 .build();
     }
+
 
     public Response getPetById(Long id) throws DataNotFoundException {
         EPet pet = petService.findById(id)
                 .orElseThrow(() -> new DataNotFoundException("Pet not found"));
-
+        EPet.Age age = pet.computeCurrentAge();
         return Response.builder()
                 .code(200)
                 .message("Pet found")
                 .data(PetResponse.builder()
                         .id(pet.getId())
                         .name(pet.getName())
-                        .ageYear(pet.getAgeYear())
-                        .ageMonth(pet.getAgeMonth())
+                        .ageYear(age.years())
+                        .ageMonth(age.months())
                         .gender(UtilService.getEnum(pet.getGender()))
                         .genderTh(UtilService.getNameThDefaulterDash(pet.getGender()))
                         .genderEn(UtilService.getNameEnDefaulterDash(pet.getGender()))

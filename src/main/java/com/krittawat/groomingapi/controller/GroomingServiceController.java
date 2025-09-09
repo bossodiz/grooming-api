@@ -21,8 +21,8 @@ public class GroomingServiceController {
     }
 
     @GetMapping("/list")
-    public Response getList(@RequestParam(name="type") String type) throws DataNotFoundException {
-        return groomingService.getList(type);
+    public Response getList() {
+        return groomingService.getList();
     }
 
     @PostMapping("/save")

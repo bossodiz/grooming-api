@@ -3,6 +3,7 @@ package com.krittawat.groomingapi.controller;
 import com.krittawat.groomingapi.controller.response.Response;
 import com.krittawat.groomingapi.error.DataNotFoundException;
 import com.krittawat.groomingapi.service.MasterService;
+import com.krittawat.groomingapi.utils.EnumUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,13 +31,14 @@ public class MasterController {
         return masterService.getPetList();
     }
 
-    @GetMapping("/grooming-list")
-    public Response getGroomingList(@RequestParam(name = "type", required = false) Long petTypeId) throws DataNotFoundException {
-        return masterService.getGroomingList(petTypeId);
-    }
-
     @GetMapping("/pet-type")
     public Response getPetTypeByName(@RequestParam(name = "name") String name) throws DataNotFoundException {
         return masterService.getPetTypeByName(name);
     }
+
+    @GetMapping("/tags")
+    public Response getTagsByType(@RequestParam(name = "type") EnumUtil.ITEM_TYPE type) throws DataNotFoundException {
+        return masterService.getTagsByType(type);
+    }
+
 }

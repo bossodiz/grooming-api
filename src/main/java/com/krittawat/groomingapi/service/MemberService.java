@@ -185,12 +185,13 @@ public class MemberService {
         return Response.builder()
                 .code(200)
                 .message("Pets found")
-                .data(pets.stream().map(pet ->
-                        PetResponse.builder()
+                .data(pets.stream().map(pet -> {
+                        EPet.Age age = pet.computeCurrentAge();
+                        return PetResponse.builder()
                                 .id(pet.getId())
                                 .name(pet.getName())
-                                .ageYear(pet.getAgeYear())
-                                .ageMonth(pet.getAgeMonth())
+                                .ageYear(age.years())
+                                .ageMonth(age.months())
                                 .gender(UtilService.getEnum(pet.getGender()))
                                 .genderTh(UtilService.getNameThDefaulterDash(pet.getGender()))
                                 .genderEn(UtilService.getNameEnDefaulterDash(pet.getGender()))
@@ -202,7 +203,8 @@ public class MemberService {
                                 .typeId(pet.getTypeId())
                                 .weight(UtilService.toStringDefaulterDash(pet.getWeight()))
                                 .service(UtilService.toStringDefaulterZero(pet.getServiceCount()))
-                                .build()))
+                                .build();
+                        }).toList())
                 .build();
     }
 }

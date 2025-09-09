@@ -9,7 +9,10 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
+import java.time.Clock;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Period;
 
 @Entity
 @Getter
@@ -56,5 +59,38 @@ public class EPet implements java.io.Serializable {
 
     public Long getTypeId() {
         return petType == null ? null : petType.getId();
+    }
+
+    public record Age(int years, int months) {}
+
+    public Age computeCurrentAge(Clock clock) {
+        int baseYears  = ageYear  == null ? 0 : ageYear;
+        int baseMonths = ageMonth == null ? 0 : ageMonth;
+
+        // ถ้าไม่มี createdDate ให้ถือว่าเริ่มนับจากวันนี้ (ไม่เพิ่มเดือน)
+        LocalDate start = (createdDate == null)
+                ? LocalDate.now(clock)
+                : createdDate.toLocalDate();
+
+        LocalDate today = LocalDate.now(clock);
+        if (today.isBefore(start)) {
+            // กันข้อมูลเพี้ยน ถ้าวันที่สร้างอยู่ “อนาคต” ให้ไม่เพิ่มเดือน
+            return new Age(baseYears, baseMonths % 12);
+        }
+
+        Period elapsed = Period.between(start, today);
+        int elapsedMonths = elapsed.getYears() * 12 + elapsed.getMonths();
+
+        int totalMonths = baseYears * 12 + baseMonths + elapsedMonths;
+        if (totalMonths < 0) totalMonths = 0;
+
+        int years  = totalMonths / 12;
+        int months = totalMonths % 12;
+        return new Age(years, months);
+    }
+
+    /** ช่วยให้เรียกแบบ default zone ได้สะดวก */
+    public Age computeCurrentAge() {
+        return computeCurrentAge(Clock.systemDefaultZone());
     }
 }
