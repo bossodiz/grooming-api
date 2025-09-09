@@ -1,10 +1,14 @@
-# ---- Build stage ----
-FROM eclipse-temurin:21-jdk AS build
+# ---- Build stage: Maven + JDK 21 ----
+FROM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /workspace
-COPY . .
-RUN mvn -f pom.xml clean package -DskipTests
 
-# ---- Run stage ----
+COPY pom.xml .
+RUN mvn -B -q -f pom.xml dependency:go-offline
+
+COPY src ./src
+RUN mvn -B -q -f pom.xml clean package -DskipTests
+
+# ---- Run stage: JRE 21 ----
 FROM eclipse-temurin:21-jre
 WORKDIR /app
 COPY --from=build /workspace/target/*.jar /app/app.jar
