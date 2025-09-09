@@ -1,7 +1,7 @@
 FROM eclipse-temurin:21-jdk AS build
 WORKDIR /app
 COPY . .
-RUN ./mvnw -DskipTests clean package
+RUN mvn clean package
 
 FROM eclipse-temurin:21-jre
 ENV TZ=Asia/Bangkok
