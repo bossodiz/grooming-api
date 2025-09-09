@@ -1,11 +1,12 @@
-# ใช้ JDK 21
-FROM eclipse-temurin:21-jdk-alpine
+# ---- Build stage ----
+FROM eclipse-temurin:21-jdk AS build
+WORKDIR /workspace
+COPY . .
+RUN mvn -f pom.xml clean package -DskipTests
 
-# ตั้ง working directory
+# ---- Run stage ----
+FROM eclipse-temurin:21-jre
 WORKDIR /app
-
-# copy jar จาก deploy (คุณต้อง build มาก่อน)
-COPY deploy/grooming-api-1.0.jar app.jar
-
-# ให้ Spring Boot ใช้ profile=prod และอ่านพอร์ตจาก Railway
-ENTRYPOINT ["java", "-jar", "app.jar", "--spring.profiles.active=prod", "--server.port=${PORT}"]
+COPY --from=build /workspace/target/*.jar /app/app.jar
+EXPOSE 8080
+ENTRYPOINT ["java","-jar","/app/app.jar"]
