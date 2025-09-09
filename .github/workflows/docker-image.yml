@@ -9,22 +9,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Build Docker image จาก Dockerfile ใน repo
-      - name: Build Docker image
-        run: |
-          docker build -t ${{ secrets.DOCKERHUB_USER }}/grooming-api:${{ github.sha }} .
-          docker tag  ${{ secrets.DOCKERHUB_USER }}/grooming-api:${{ github.sha }} \
-                      ${{ secrets.DOCKERHUB_USER }}/grooming-api:latest
+      - uses: docker/setup-buildx-action@v3
 
-      # Login + Push ไป Docker Hub (ทั้ง commit tag และ latest)
-      - name: Login & Push to Docker Hub
-        run: |
-          echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USER }}" --password-stdin
-          docker push ${{ secrets.DOCKERHUB_USER }}/grooming-api:${{ github.sha }}
-          docker push ${{ secrets.DOCKERHUB_USER }}/grooming-api:latest
+      - uses: docker/login-action@v3
+        with:
+          registry: docker.io
+          username: ${{ secrets.DOCKERHUB_USER }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      # SSH เข้าเซิร์ฟเวอร์แล้วสั่ง compose ให้ดึง image ใหม่และสตาร์ต api
-      - name: Deploy on server (pull & up api)
+      - name: Build & Push with cache
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USER }}/grooming-api:latest
+            ${{ secrets.DOCKERHUB_USER }}/grooming-api:${{ github.sha }}
+          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USER }}/grooming-api:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USER }}/grooming-api:buildcache,mode=max
+
+      - name: Deploy on server
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_IP }}
@@ -34,4 +38,3 @@ jobs:
             cd ~/apps/grooming
             docker compose pull api
             docker compose up -d api
-            docker compose ps
