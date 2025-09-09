@@ -9,11 +9,8 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate    # สะดวกตอน dev
+      ddl-auto: update    # สะดวกตอน dev
     show-sql: true
-  flyway:
-    enabled: true
-    locations: classpath:db/migration
 
 logging:
   level:
