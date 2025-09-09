@@ -1,6 +1,19 @@
 spring:
   jpa:
     show-sql: false
+    hibernate:
+      ddl-auto: validate   # ปลอดภัยกว่า ไม่แก้สคีมาอัตโนมัติใน prod
+
 logging:
   level:
     root: INFO
+
+# ความลับ: อ่านจาก ENV ในเครื่องจริง
+jwt:
+  secret-key: ${JWT_SECRET:PLEASE_SET_IN_ENV_FOR_PROD}
+  expiration: 86400000
+
+payment:
+  promptpay:
+    receiverPhone: "0818092589"
+    expiresSeconds: 300
