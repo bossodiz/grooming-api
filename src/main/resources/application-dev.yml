@@ -1,3 +1,6 @@
+server:
+  servlet:
+    context-path: /api
 spring:
   jackson:
     time-zone: Asia/Bangkok
