@@ -1,25 +1,28 @@
-server:
-  servlet:
-    context-path: /api
 spring:
-  jackson:
-    time-zone: Asia/Bangkok
   datasource:
-    url: jdbc:mysql://localhost:3306/dev
+    url: jdbc:mysql://localhost:3306/dev?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Bangkok
     username: admin
     password: 1234
-    driver-class-name: com.mysql.jdbc.Driver
+    driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       maximum-pool-size: 10
-    jpa:
-      hibernate:
-        ddl-auto: update
-      show-sql: true
+
+  jpa:
+    hibernate:
+      ddl-auto: update    # สะดวกตอน dev
+    show-sql: true
+
+logging:
+  level:
+    root: DEBUG
+
+# !!! แนะนำมาก: อย่า hardcode ความลับในไฟล์
+# ให้เปลี่ยนเป็นอ่านจาก ENV (ด้านล่างมีตัวอย่าง)
 jwt:
-  secret-key: NkQyYzNsbmQxNTJhZTJwZ2p2ZGZ5bjRkdmkwb0x6W0xFSF5Gb+OXy7hOjz7hGjmI==
-  expiration: 86400000 # 1 วัน (มิลลิวินาที)
+  secret-key: ${JWT_SECRET:CHANGE_ME_FOR_DEV_ONLY}
+  expiration: 86400000   # 1 วัน (ms)
 
 payment:
   promptpay:
-    receiverPhone: "0818092589"   # หรือคอมเมนต์บรรทัดนี้ถ้าใช้ National ID
-    expiresSeconds: 300           # เวลาให้ลูกค้าสแกน (วินาที)
+    receiverPhone: "0818092589"
+    expiresSeconds: 300
