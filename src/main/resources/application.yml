@@ -5,6 +5,7 @@ spring:
       maximum-pool-size: 10
 
   jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
       ddl-auto: none    # สะดวกตอน dev
     show-sql: true
