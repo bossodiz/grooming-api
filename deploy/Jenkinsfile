@@ -1,16 +1,18 @@
 pipeline {
   agent any
-  options { timestamps() }
+  options { timestamps(); disableConcurrentBuilds() }  // กัน build ซ้อน
 
   environment {
-    COMPOSE_PROJECT     = 'bbp'
-    DEPLOY_COMPOSE_APP  = '/workspace/deploy/docker-compose-app.yml'
     APP_NAME            = 'grooming-api'
+    SERVICE_NAME        = 'api'
+    COMPOSE_PROJECT     = 'bbp'
+    DEPLOY_DIR          = '/workspace/deploy'
+    DEPLOY_COMPOSE_APP  = "${DEPLOY_DIR}/docker-compose-app.yml"
   }
 
   stages {
     stage('Checkout') {
-      steps { checkout scm }   // ดึงโค้ดทั้ง repo
+      steps { checkout scm }
     }
 
     stage('Compute Tag') {
@@ -33,8 +35,11 @@ pipeline {
             sh """
               set -e
               echo "\$DOCKER_PASS" | docker login -u "\$DOCKER_USER" --password-stdin
-              IMAGE="\$DOCKER_USER/${APP_NAME}:${IMG_TAG}"
-              LATEST="\$DOCKER_USER/${APP_NAME}:latest"
+
+              NAMESPACE="\$DOCKER_USER"
+              IMAGE="\$NAMESPACE/${APP_NAME}:${IMG_TAG}"
+              LATEST="\$NAMESPACE/${APP_NAME}:latest"
+
               docker build --pull -t "\$IMAGE" -t "\$LATEST" -f Dockerfile .
               docker push "\$IMAGE"
               docker push "\$LATEST"
@@ -44,14 +49,21 @@ pipeline {
       }
     }
 
-    stage('Deploy (api)') {
+    stage('Deploy') {
       steps {
-        sh """
-          set -e
-          docker compose -p ${COMPOSE_PROJECT} -f ${DEPLOY_COMPOSE_APP} pull api
-          docker compose -p ${COMPOSE_PROJECT} -f ${DEPLOY_COMPOSE_APP} up -d api
-        """
+        dir("${DEPLOY_DIR}") {
+          sh """
+            set -e
+            docker compose --env-file .env -p ${COMPOSE_PROJECT} -f ${DEPLOY_COMPOSE_APP} pull ${SERVICE_NAME}
+            docker compose --env-file .env -p ${COMPOSE_PROJECT} -f ${DEPLOY_COMPOSE_APP} up -d ${SERVICE_NAME}
+          """
+        }
       }
     }
+  }
+
+  post {
+    success { echo "✅ Deployed ${env.APP_NAME}:${env.IMG_TAG} to service ${env.SERVICE_NAME}" }
+    failure { echo "❌ Build/Deploy failed for ${env.APP_NAME}" }
   }
 }
