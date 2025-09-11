@@ -30,16 +30,26 @@ pipeline {
 
     stage('Build & Test (Maven)') {
       steps {
-        sh '''
+        sh """
+          set -e
+          # หา pom.xml ตัวแรกใน repo (ลึกไม่เกิน 3 ชั้น); ถ้าเจอหลายตัวจะหยิบตัวแรก
+          POM_PATH=\$(find . -maxdepth 3 -type f -name pom.xml | head -n1)
+          if [ -z "\$POM_PATH" ]; then
+            echo "❌ ไม่พบ pom.xml ใน repo"; exit 1
+          fi
+          echo "✅ ใช้ POM: \$POM_PATH"
+
+          # รันใน container Maven โดย mount workspace (เผื่อ path มีช่องว่าง)
           docker run --rm \
             -v \"${WORKSPACE}\":/app \
             -w /app \
             -e MAVEN_CONFIG=/root/.m2 \
             maven:3.9-eclipse-temurin-21 \
-            mvn -B -e -DskipTests=false test package
-        '''
+            mvn -B -e -DskipTests=false -f "\$POM_PATH" test package
+        """
       }
     }
+
 
     stage('Build Docker Image') {
       steps {
