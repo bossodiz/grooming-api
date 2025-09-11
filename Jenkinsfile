@@ -18,7 +18,7 @@ pipeline {
     stage('Init Vars') {
       steps {
         script {
-          env.BRANCH_NAME = sh(returnStdout: true, script: 'git rev-parse --abbrev-ref HEAD').trim()
+          env.BRANCH_NAME = 'main'
           env.SHORT_SHA   = sh(returnStdout: true, script: 'git rev-parse --short HEAD').trim()
           env.BRANCH_SAFE = env.BRANCH_NAME.replaceAll(/[^A-Za-z0-9._-]/, '-')
           env.TAG         = "${env.BRANCH_SAFE}-${env.SHORT_SHA}"
@@ -31,7 +31,11 @@ pipeline {
     stage('Build & Test (Maven)') {
       steps {
         sh '''
-          docker run --rm -v "$PWD":/app -w /app maven:3.9-eclipse-temurin-21 \
+          docker run --rm \
+            -v \"${WORKSPACE}\":/app \
+            -w /app \
+            -e MAVEN_CONFIG=/root/.m2 \
+            maven:3.9-eclipse-temurin-21 \
             mvn -B -e -DskipTests=false test package
         '''
       }
