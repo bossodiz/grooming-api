@@ -1,10 +1,11 @@
-# ---- Build stage ----
+# ---- Build & Test stage ----
 FROM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /app
 COPY pom.xml .
-RUN mvn -B -q -e -DskipTests dependency:go-offline
+RUN mvn -B -q -DskipTests dependency:go-offline
 COPY . .
-RUN mvn -B -q -e -DskipTests package
+# รัน unit test + package ให้ fail ที่นี่ถ้าเทสพัง
+RUN mvn -B -e -DskipTests=false test package
 
 # ---- Runtime stage ----
 FROM eclipse-temurin:21-jre

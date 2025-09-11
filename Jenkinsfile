@@ -51,14 +51,15 @@ pipeline {
     }
 
 
-    stage('Build Docker Image') {
-      steps {
-        sh '''
+    stage('Docker Build') {
+          steps {
+            sh """
+          set -e
           docker build -t ${IMAGE_NAME}:${TAG} .
           if [ "${BRANCH_NAME}" = "main" ] || [ "${BRANCH_NAME}" = "master" ]; then
             docker tag ${IMAGE_NAME}:${TAG} ${IMAGE_NAME}:latest
           fi
-        '''
+        """
       }
     }
 
