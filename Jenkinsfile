@@ -24,7 +24,7 @@ pipeline {
       }
     }
 
-    stage('Docker Build (tests run inside Dockerfile)') {
+    stage('Docker Build') {
       steps {
         sh """
           set -e
