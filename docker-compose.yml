@@ -1,0 +1,55 @@
+version: "3.8"
+
+networks:
+  appnet:
+    external: true
+
+volumes:
+  mysql_data:
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: ${STACK_PREFIX}_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      TZ: Asia/Bangkok
+    command: ["mysqld", "--default-authentication-plugin=mysql_native_password"]
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks: [appnet]
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -p${MYSQL_ROOT_PASSWORD} || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ${STACK_PREFIX}_api
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/${MYSQL_DATABASE}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Bangkok
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      TZ: Asia/Bangkok
+      JAVA_TOOL_OPTIONS: "-Xms128m -Xmx512m"
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "18080:8080"
+    networks: [appnet]
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health || curl -sf http://localhost:8080/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
