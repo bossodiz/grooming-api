@@ -10,7 +10,7 @@ volumes:
 services:
   db:
     image: mysql:8.0
-    container_name: ${STACK_PREFIX}_db
+    container_name: bbp-db
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
@@ -34,7 +34,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: ${STACK_PREFIX}_api
+    container_name: bbp-api
     restart: unless-stopped
     environment:
       SPRING_PROFILES_ACTIVE: prod

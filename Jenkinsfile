@@ -7,7 +7,7 @@ pipeline {
   }
 
   environment {
-    PROJECT  = "bbp_api_${params.BRANCH}"
+    PROJECT  = "bbp_api"
     WORKDIR  = "workspace-api-${params.BRANCH}"
   }
 
