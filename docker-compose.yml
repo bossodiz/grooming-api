@@ -19,6 +19,8 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       TZ: Asia/Bangkok
     command: ["mysqld", "--default-authentication-plugin=mysql_native_password"]
+    ports:
+      - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     networks: [appnet]
