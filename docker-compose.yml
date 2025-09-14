@@ -1,4 +1,4 @@
-version: "3.8"
+# docker-compose.yml  (db + api)
 
 networks:
   appnet:
@@ -6,6 +6,7 @@ networks:
 
 volumes:
   mysql_data:
+    name: bbp_mysql_data_main   # ชื่อคงที่ ไม่ผูกกับ -p ชื่อโปรเจ็กต์
 
 services:
   db:
@@ -14,18 +15,22 @@ services:
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}       # เลือก prod หรือ dev ให้ตรงที่ต้องการใช้
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       TZ: Asia/Bangkok
-    command: ["mysqld", "--default-authentication-plugin=mysql_native_password"]
+    command: ["mysqld","--default-authentication-plugin=mysql_native_password"]
     ports:
-      - "3306:3306"
+      - "3306:3306"        # ถ้าจะไม่ให้ LAN ต่อเข้ามา ตัดบรรทัดนี้ออก
     volumes:
       - mysql_data:/var/lib/mysql
-    networks: [appnet]
+    networks:
+      appnet:
+        aliases:
+          - db             # ให้ชื่อ db ใช้ได้แน่ ๆ ภายใน network
+          - bbp-db
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h localhost -p${MYSQL_ROOT_PASSWORD} || exit 1"]
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -p${MYSQL_ROOT_PASSWORD} || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 30
@@ -51,7 +56,7 @@ services:
       - "18080:8080"
     networks: [appnet]
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health || curl -sf http://localhost:8080/actuator/health || exit 1"]
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/actuator/health || curl -sf http://127.0.0.1:8080/actuator/health || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 10

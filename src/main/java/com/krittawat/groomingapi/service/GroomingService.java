@@ -59,6 +59,7 @@ public class GroomingService {
         return Response.builder()
                 .code(200)
                 .message("Grooming service added successfully")
+                .data(item)
                 .build();
     }
 
