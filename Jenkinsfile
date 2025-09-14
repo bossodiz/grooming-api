@@ -30,7 +30,7 @@ pipeline {
       steps {
         sh """
           docker network create appnet || true
-          docker compose -p ${PROJECT} build api
+          docker compose build api
         """
       }
     }
@@ -38,9 +38,9 @@ pipeline {
     stage('Deploy API') {
       steps {
         sh """
-          docker compose -p ${PROJECT} up -d db
-          docker compose -p ${PROJECT} up -d --no-deps api
-          docker compose -p ${PROJECT} ps
+          docker compose up -d db
+          docker compose up -d --no-deps api
+          docker compose ps
         """
       }
     }
